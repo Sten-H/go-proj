@@ -6,7 +6,7 @@
   var board_view;
   var board;
 
-  class DrawStone {
+  function DrawStone {
     static draw(stone, tile_size, offset) {
       ctx.beginPath();
       var midpoint_x = stone.x * tile_size + offset;
