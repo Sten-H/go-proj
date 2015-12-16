@@ -1,0 +1,27 @@
+html, body {
+    height: 100%;
+}
+body {
+    margin: 0;
+}
+
+.flex-container {
+	
+	text-align: center;
+}
+#go-canvas {
+	border: 3px solid black;
+}
+
+#go-button-wrapper {
+	text-align: center;
+}
+
+button {
+	border-radius: 5px;
+	background-color: #FFF;
+	border: 1px solid black;
+	box-shadow: 2px 2px gray;
+	font-size: 1em;
+	margin: 20px .5em;
+}
