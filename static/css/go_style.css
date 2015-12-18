@@ -4,13 +4,18 @@ html, body {
 body {
     margin: 0;
 }
-
-.flex-container {
-	
+#search-box {
+	margin-top: 3em;
+	text-align:center ;
+}
+#game-container {
 	text-align: center;
 }
 #go-canvas {
-	border: 3px solid black;
+	margin-top: 1%;
+	/*border: 3px solid black;*/
+	border-radius: 5px;
+	box-shadow: 0 0 25px #000;
 }
 
 #go-button-wrapper {
