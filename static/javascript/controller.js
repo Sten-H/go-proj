@@ -4,16 +4,42 @@
   var board_view;
   var board;
 
-  var peer = new Peer({key: 'lwjd5qra8257b9', debug: 2});
+  var peer = new Peer({key: 'slhk5rehnzc15rk9', debug: 2});
   var conn = null;
   var my_id;    //A token to connec to this peer
   var player_color; //Player color in the game.
 
+  //Logging to event history
+  function update_event_history(move){
+    var evt_string = '<li><span>';
+    var color_string = (move.color == 1) ? 'Black ' : 'White ';
+    if(move.stone != null) 
+      evt_string += color_string + 'played at ' + (move.stone.x + 1) + ', ' + (move.stone.y); 
+    
+    else if(move.pass != null)
+      evt_string += color_string + 'passed';
+    else if(move.resign != null)
+      evt_string += color_string + 'resigned. You win!'
+    evt_string += '</span></li>';
+    $('#event-list').append(evt_string);
+    //Scroll to bottom of log
+    $("#event-history").animate({ scrollTop: $("#event-history")[0].scrollHeight}, 1000);
+  }
+  //Animation effects
+  function switch_player_cards() {
+    var black_move = $('#player-black').outerHeight() * ((board.current_player == 1) ? -1 : 1);
+    var white_move = black_move * -1;
+    var black_string = "+=" + black_move.toString() + "px";
+    var white_string = "+=" + white_move.toString() + "px";
+    $('#player-black').animate({
+      top: black_string
+    }, 1000)
+    $('#player-white').animate({
+      top: white_string
+    }, 1000)
 
-//Gameboard interaction
-
-
-  
+  }
+  //Gameboard interactions
   function update() {
     //?
   }
@@ -22,29 +48,56 @@
     board_view.draw(board, ctx); 
   }
 
-  function play_opponent_move(x, y, color) {
-    board.place_stone(x, y);
-  }
 
-  function tick() {
-    if(board.getWinner() == null){
-      window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
-      update();
-      render();
+  function play_move(move) {
+    //Place stone
+    if(move.stone != null){
+      var stone = move.stone
+      if(!board.place_stone(stone.x, stone.y)){
+        illegal_move_dialog();
+        return;
+      }
+      else { //If move was legal
+        update_event_history(move);
+      }
     }
-    else {
-      var winner_string = (board.getWinner() == 1) ? 'Black' : 'White';
-      $('#winner-dialog-text').text(winner_string + ' is the winner!');
-      $('#winner-dialog').dialog({
-        dialogClass: "no-close",  
-        buttons: [
+    //Pass
+    else if(move.pass != null) {
+      board.player_pass();
+      update_event_history(move);
+    }
+    else if(move.resign != null) {
+      console.log('hello?');
+      board.player_resign(move.color);
+      update_event_history(move);
+      winner_dialog();
+    }
+    if(move.color == player_color){
+        send_data({move: move});
+    }
+    if(move.resign == null)
+      switch_player_cards();
+  }
+  function winner_dialog(){
+    var winner_string = (board.get_winner() == 1) ? 'Black' : 'White';
+    $('#winner-dialog-text').text(winner_string + ' is the winner!');
+    $('#winner-dialog').dialog({
+      dialogClass: "no-close",  
+      buttons: [
         {
           text: "OK",
           click: function() { $( this ).dialog( "close" ); }
         }
       ]
     });
-    }
+  }
+
+  function tick() {
+      window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
+      update();
+      render();
+    
+      
   }
 
   function init() {
@@ -101,16 +154,22 @@
   });
 
   //Receiving connection
-  peer.on('connection', function(connz) {
+  peer.on('connection', function(connection) {
   //Connection sending data
-    connz.on('data', function(data){
+    connection.on('data', function(data){
       if(data.id != null) {
         player_color = (data.opponent_color == 1) ? 0 : 1;
         connect_to_player(data.id, false); // Connect back to peer
       }
       else if(data.move != null){
-        console.log('gonna play oppoent move');
-        play_opponent_move(data.move.x, data.move.y, data.color);
+        play_move(data.move);
+      }
+
+      else if(data.disconnect != null) {
+        if(board.winner == null) {
+          board.set_winner(player_color);
+          winner_dialog();
+        }
       }
       else
         console.log(data);
@@ -124,11 +183,16 @@
 
     //Add listener to pass button
     $('#pass-button').click(function(){
-      board.player_pass();
+      if(player_color == board.current_player && board.winner == null){
+        play_move({pass: true, color: player_color})
+      }
     });
     //Add listener to resign button
     $('#resign-button').click(function(){
-      board.player_resign();
+      if( board.winner == null) {
+        console.log('listener');
+        play_move({resign: true, color: player_color});
+      }
     });
     //Detect mouse movement
     $(canvas).mousemove(function(e){
@@ -137,14 +201,10 @@
     });
     //Detect mouse click
     $(canvas).click(function(e) {
-      if(player_color == board.current_player){
+      if(player_color == board.current_player && board.winner == null){
         var mouse_pos = get_mouse_pos(canvas, e);
         var tile_pos = board_view.get_tile_coord(mouse_pos.x, mouse_pos.y);
-        if(!board.place_stone(tile_pos.x, tile_pos.y))
-          illegal_move_dialog();
-        else{
-          send_data({move: {x: tile_pos.x, y: tile_pos.y}, player_color});
-        }
+        play_move({stone: {x: tile_pos.x, y: tile_pos.y}, color: player_color});
       }
     });
     //Detect resize
@@ -153,6 +213,12 @@
         canvas.width = canvas.height = canvas_width = $(window).innerHeight() * 0.9 ;
         board_view.recalculate_size(canvas_width);
       }
+    });
+    //Detect leaving page
+    $(window).unload(function(){
+      send_data({disconnect: true});
+      conn.destroy();
+      peer.destroy();
     });
     
     //Add functionality to search button
@@ -176,9 +242,7 @@
         error: function(error) {
           console.log(error);
         }
-    }); //End of Ajax
-  }); //End of search button
-    //init();
-    //tick();
+      }); //End of Ajax
+    }); //End of search button
   });
 }());

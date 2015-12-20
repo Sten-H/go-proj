@@ -4,12 +4,86 @@ html, body {
 body {
     margin: 0;
 }
+#event-history ul {
+	list-style: none;
+	padding: 0px;
+}
+
+#event-history ul li {
+	background: linear-gradient(to right, #F5F5F5, #FFF);
+	border-left: 3px solid #404040;
+	padding: 2px 0 2px 0;
+	margin: 4px 0 4px 0;
+}
+
+#event-history {
+	position: relative;
+	top: 175px;
+	left: 10px;
+	width: 180px;
+	height: 550px;
+	overflow: auto;
+	margin-right: 10px;
+	background-color: white;
+}
+#event-history span {
+	padding-left: 5px;
+}
+#player-white {
+	position: absolute;
+	top: 84px;
+	left: 0px;
+}
+#player-black {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	background-color: #EDEDED;
+}
+.player-info {
+	width: 190px;
+	margin: 2px 5px 2px 5px;
+	height: 80px;
+	background: linear-gradient(to right, #F2F2F2, white); /* Standard syntax */
+	text-align: center;
+	border-radius: 10px;
+	border: 1px solid black;
+}
+
+.player-info span {
+}
+
+.player-info h3 {
+	font-size: 1em;
+}
+
+#player-info-container {
+	position: relative;
+}
+.column-right {
+	float: left;
+}
+
+.column-left {
+	width: 200px;
+	height: 90%;
+	float: left;
+	background-color: #DEF3FA;
+	margin-top: 1%;
+	margin-right: 15px;
+	margin-left: 10px;
+	border: 1px black solid;
+}
+
 #search-box {
 	margin-top: 3em;
 	text-align:center ;
 }
 #game-container {
-	text-align: center;
+	width: auto;
+	height:100%;
+	margin: 0 auto;
+	/*text-align: center;*/
 }
 #go-canvas {
 	margin-top: 1%;

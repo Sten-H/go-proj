@@ -37,7 +37,6 @@ def logout():
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-    #So maybe keep polling search with ajax until it returns the id of another player?
     if request.method == 'POST':
         id = request.form.get('id')
         if len(player_queue) == 0:
@@ -48,6 +47,10 @@ def search():
             return jsonify(id=p2)
     else:
         return render_template('test_conn.html')
+
+@app.route('/test')
+def css_test():
+    return render_template('csstest.html')
 
 @app.route('/go')
 def go_view():

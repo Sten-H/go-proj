@@ -4,7 +4,7 @@ function Stone(x, y, color) {
     this.y = y;
     this.color = color;
     this.liberty_count = 4;
-    this.visited = false; //To be used when checking life
+    this.visited = false; //Is used to avoid checking life of the samge group multiple times. 
 
     this.set_liberty_count = function(c) { 
       this.liberty_count = c;
@@ -25,10 +25,10 @@ function Board(size) {
   this.get_stones = function() {
     return this.stones;
   }
-  this.setWinner = function(color) {
+  this.set_winner = function(color) {
     this.winner = color;
   }
-  this.getWinner = function() {
+  this.get_winner = function() {
     return this.winner;
   }
   this.switch_current_player = function() {
@@ -79,8 +79,8 @@ function Board(size) {
         this.count_liberties(x, y);
   }
   
-  /*
-  Sets the visited propert of each stone to false. Should be done after each new stone has been settled.
+  /**
+  *Sets the visited property of each stone to false. Should be done after each new stone has been settled.
   */
   this.reset_visited = function() {
     for(var x = 0; x < this.size; x++)
@@ -88,8 +88,8 @@ function Board(size) {
         if(this.tile_occupied(x, y))
           this.stones[x][y].visited = false;
   }
-  /*
-  Removes 1 stone from play, this removal updates liberties locally. quick. Used for undo.
+  /**
+  *Removes 1 stone from play, this removal updates liberties locally. quick. Used for undo.
   */
   this.remove_stone = function(stone) {
     this.stones[stone.x][stone.y] = null;
@@ -100,10 +100,10 @@ function Board(size) {
     for(var i = 0; i < group.length; i++)
       this.stones[group[i].x][group[i].y] = null;
   }
-  /*
-    Finds entire groups of stones recursively. the visited array that is passed in the paramaters
-    is the actual stones visited in the end. The visited property on each stone is used for search 
-    optimization not to find the group of stones.
+  /**
+  *Finds entire groups of stones recursively. the visited array that is passed in the paramaters
+  *is the actual stones visited in the end. The visited property on each stone is used for search 
+  *optimization not to find the group of stones.
   */
   this.recursive_group_search = function(queue, liberties, visited) {
     if(queue.length < 1) {
@@ -135,10 +135,10 @@ function Board(size) {
     var group_info = this.recursive_group_search(queue, 0, [this.stones[x][y]]);
     return group_info;
   }
-  /*
-  Returns a queue of the stones in an area, where the enemy stones are placed at the front of the queue.
-  This is important because the placed stones, and the player who made the move, should have its stones
-  checked for life last. Make suicidal moves where you capture work.
+  /**
+  *Returns a queue of the stones in an area, the opponent stones are placed at the front of the queue.
+  *This is important because the placed stones, and the player who made the move, should have its stones
+  *checked for life last. Make suicidal moves where you capture work.
   */
   this.get_stone_queue = function(x, y){
     var ndir = dir.slice(); //copy array
@@ -153,14 +153,14 @@ function Board(size) {
       }
     }
     var color_mult = (this.current_player == 0) ? -1 : 1; // used to reverse order of sort depending on color
-    //Sort stones so enemy stones are first
+    //Sort stones so enemy stones are first, this is important because of removal priority of dead groups.
     stone_queue.sort(function(a, b) {
       return (a.color - b.color) * color_mult;
     });
     return stone_queue;
   }
-  /*
-  Removes dead groups from board and updates liberties of ALL stones.
+  /**
+  *Removes dead groups from board and updates liberties of ALL stones.
   */
   this.remove_dead_groups = function(dead_groups) {
     if(dead_groups.length == 0)
@@ -171,9 +171,9 @@ function Board(size) {
         this.remove_group(dead_groups[i].group);
     }
   }
-  /*
-  This returns a list of group info on the groups surrounding x, y. The list is sorted
-  with enemy groups coming first and current player last. This is very important.
+  /**
+  *Returns a list of group info on the groups surrounding x, y. The list is sorted
+  *with enemy groups coming first and current player last. This is very important.
   */
   this.get_area_groups = function(x, y) {
     var stone_queue = this.get_stone_queue(x, y);
@@ -246,15 +246,11 @@ function Board(size) {
   this.player_pass = function() {
     this.history.push("P");
     this.switch_current_player();
-    console.log('Player passed');
-    console.log(this.history);
   }
 
-  this.player_resign = function() {
-    this.history.push("R");
-    this.setWinner((this.current_player == 1) ? 0 : 1);
-    console.log('Player resigned');
-    console.log(this.history);
+  this.player_resign = function(color) {
+    this.history.push("R W");
+    this.set_winner((color == 1) ? 0 : 1);
   }
 }
 
