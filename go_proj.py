@@ -7,16 +7,16 @@ SECRET_KEY = 'development key'
 USERNAME = 'admin'
 PASSWORD = 'default'
 
-app = Flask(__name__)
-app.config.from_object(__name__)
+application = Flask(__name__)
+application.config.from_object(__name__)
 
 player_queue = []
 
-@app.route('/')
+@application.route('/')
 def main_view():
     return render_template('main_layout.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         #Try login details later
@@ -31,11 +31,11 @@ def login():
         return render_template('login.html')
 
 
-@app.route('/logout')
+@application.route('/logout')
 def logout():
     return Response('Logout', mimetype='text/plain')
 
-@app.route('/search', methods=['GET', 'POST'])
+@application.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
         id = request.form.get('id')
@@ -48,14 +48,14 @@ def search():
     else:
         return render_template('test_conn.html')
 
-@app.route('/test')
+@application.route('/test')
 def css_test():
     return render_template('csstest.html')
 
-@app.route('/go')
+@application.route('/go')
 def go_view():
     return render_template('game_view.html')
 
 
 if __name__ == '__main__':
-    app.run()
+    application.run()
