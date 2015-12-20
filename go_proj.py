@@ -14,12 +14,12 @@ player_queue = []
 
 @application.route('/')
 def main_view():
-    return render_template('main_layout.html')
+    return render_template('game_view.html')  # Temporarily just redirect to the game
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        #Try login details later
+        # Try login details later
         #if request.form['username'] != app.config['USERNAME']:
         #    error = 'Invalid username'
         #elif request.form['password'] != app.config['PASSWORD']:
