@@ -56,6 +56,14 @@ def css_test():
 def go_view():
     return render_template('game_view.html')
 
+@application.route('/disconnect_user', methods=['POST'])
+def disconnect_user():
+    id = request.form.get('id')
+    print(player_queue)
+    player_queue.remove(id)
+    print(player_queue)
+    return json.dumps({'status': 'OK'})
+
 
 if __name__ == '__main__':
     application.run()
