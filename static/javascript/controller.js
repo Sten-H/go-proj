@@ -39,6 +39,7 @@
     }, 1000)
 
   }
+
   //Gameboard interactions
   function update() {
     //?
@@ -51,6 +52,8 @@
 
   function play_move(move) {
     //Place stone
+    if(board == null) // This is to prevent a situation where one player sends a move to a person who hasn't initalized his board. Can happen.
+      init();
     if(move.stone != null){
       var stone = move.stone
       if(!board.place_stone(stone.x, stone.y)){
@@ -102,12 +105,14 @@
 
   function init() {
     console.log('initializing game');
-    
-    board = new Board(13);
-    board_view = new BoardView(13, canvas_width);
-    $('#game-container').show();
-    $('#search-box').hide();
-    tick();
+    if(board == null && board_view == null){
+      var size = Number($('#size').val());
+      board = new Board(size);
+      board_view = new BoardView(size, canvas_width);
+      $('#game-container').show();
+      $('#search-box').hide();
+      tick();
+    }
   }
   function get_mouse_pos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
@@ -150,6 +155,7 @@
 
   peer.on('open', function(id) {
     my_id = id;
+    $('#search-button').prop('disabled', false);
     console.log('My peer ID is: ' + id);
   });
 
@@ -174,6 +180,12 @@
       else
         console.log(data);
       });
+  });
+
+  peer.on('error', function(err){
+    console.log(err);
+    location.reload(); // FIXME this is sort of a hack. Matching probably failed because received id was dead, 
+                       // both ids are removed this way and client gets a new one. User should atleast be informed somehow what happened.
   });
 
   $(function() {  //document ready short
@@ -214,18 +226,13 @@
         board_view.recalculate_size(canvas_width);
       }
     });
-    //Detect leaving page
+
     $(window).unload(function(){
       send_data({disconnect: true});
-      conn.destroy();
-      peer.destroy();
     });
     
     //Add functionality to search button
-    $('#search-form').submit(function(event){
-        event.preventDefault();
-    });
-    
+    $('#search-button').prop('disabled', true); // Disabled until clients has acquired a peer id
     $('#search-button').click(function(){
         $('#id').val(my_id);
         $('#search-text').text('Searching for opponent...');

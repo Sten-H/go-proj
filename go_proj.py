@@ -1,5 +1,5 @@
 from flask import Flask, json, jsonify, redirect, url_for, request, flash, session, Response, render_template
-
+from collections import namedtuple
 # configuration
 #DATABASE = '/tmp/flaskr.db'
 DEBUG = True
@@ -11,6 +11,10 @@ application = Flask(__name__)
 application.config.from_object(__name__)
 
 player_queue = []
+Player = namedtuple('Player', 'id size')
+
+def add_to_queue(player):
+    player_queue.append(player)
 
 @application.route('/')
 def main_view():
@@ -39,12 +43,23 @@ def logout():
 def search():
     if request.method == 'POST':
         id = request.form.get('id')
+        size = int(request.form.get('size'))
+        print 'size:' + str(size)
         if len(player_queue) == 0:
-            player_queue.append(id)
-            return json.dumps({'status': 'OK'})
+            add_to_queue(Player(id, size))
+            return json.dumps({'status': 'In queue'})
         else:
-            p2 = player_queue.pop()
-            return jsonify(id=p2)
+            opponent = None
+            for player in player_queue:
+                if (not player.id == id) and player.size == size:
+                    opponent = player
+            if opponent:
+                player_queue.remove(opponent)
+                return jsonify(id=opponent.id)
+            else:
+                add_to_queue(Player(id, size))
+                return json.dumps({'status': 'OK'})
+
     else:
         return render_template('test_conn.html')
 
