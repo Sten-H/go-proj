@@ -4,7 +4,14 @@
   var board_view;
   var board;
 
-  var peer = new Peer({key: 'slhk5rehnzc15rk9', debug: 2});
+  var peer = new Peer({key: 'slhk5rehnzc15rk9', 
+                      config: {'iceServers': [
+                      { url: 'stun:stun.l.google.com:19302' },
+                      { url: 'stun:stun1.l.google.com:19302' },
+                      { url: 'stun:stun2.l.google.com:19302' },
+                      { url: 'stun:stun3.l.google.com:19302' },
+                      { url: 'turn:homeo@turn.bistri.com:80', credential: 'homeo' }, 
+                      debug: 2});
   var conn = null;
   var my_id;    //A token to connec to this peer
   var player_color; //Player color in the game.
