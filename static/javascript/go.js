@@ -372,14 +372,14 @@ function Board(size) {
 	this.determine_winner = function(score) {
 		score = this.area_score();
 		var komi = this.get_komi();
-		console.log(score);
-		console.log(komi);
 		if(score.black > score.white + komi)
 			this.winner = 1;
 		else if(score.black < score.white + komi)
 			this.winner = 0;
 		else
 			this.winner = -1; // Draw
+		winner_string = (this.winner == 1) ? 'Black' : 'White'; //FIXME delete later
+		console.log('Winner is ' + winner_string);
 		return this.winner;
 	}
 	this.undo_last_move = function() {
@@ -407,20 +407,21 @@ function Board(size) {
 				this.undo_last_move();
 				return false;
 			} else {
-				console.log('stone was placed at' + x + ", " + y);
 				this.cleanup(dead_groups);
 				this.switch_current_player();
 				return true;
 			}
-		} else {
+		} 
+		else
 			return false; //Tried to place on an existing stone
-		}
 	}
-
+	/**
+	 * Player passes his turn, game ends on two consecutive passes.
+	 * @return {[type]} [description]
+	 */
 	this.player_pass = function() {
 		var last_move = this.history[this.history.length - 1]
 		this.history.push("P");
-    console.log(last_move);
 		if (last_move == "P")
 			this.determine_winner();
 		this.switch_current_player();

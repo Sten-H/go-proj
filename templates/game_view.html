@@ -24,6 +24,7 @@
       -->
       <form id="search-form">
         <input type="hidden" name="id" id="id" value="id-here">
+        <input type="textfield" name="username" id="username" placeholder="Nickname">
         <select name="size" id="size">
           <option value="9">9x9</option>
           <option value="13">13x13</option>
@@ -50,7 +51,9 @@
         </div>
       </div>
       <div class="column-right">
-        <canvas id="go-canvas"></canvas>
+        <div id="canvas-wrapper">
+          <canvas id="go-canvas"></canvas>
+        </div>
         <div id="go-button-wrapper">
           <button id="pass-button">Pass</button>
           <button id="resign-button">Resign</button>

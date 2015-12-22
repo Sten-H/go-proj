@@ -103,9 +103,9 @@ function BoardView(tile_amount, canvas_width) {
       ctx.moveTo(0 + this.offset, i * this.tile_size + this.offset);
       ctx.lineTo( (this.tile_amount - 1) * this.tile_size + this.offset, i * this.tile_size + this.offset);
       ctx.stroke();
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = '#3B3B3B';
       //Draw vertical line text
-      ctx.font = "12px Arial";
+      ctx.font = "bold 16px Arial";
       ctx.fillText(i + 1, 0 + this.offset / 2, i * this.tile_size + this.offset * 1.15);
       
       //Draw horizontal line text

@@ -10,69 +10,85 @@ body {
 }
 
 #event-history ul li {
-	background: linear-gradient(to right, #F5F5F5, #FFF);
-	border-left: 3px solid #404040;
+	border-top: 1px solid #D6D6D6;
+	/*border-left: 3px solid #404040;*/
 	padding: 2px 0 2px 0;
 	margin: 4px 0 4px 0;
 }
 
-#event-history {
-	position: relative;
-	top: 175px;
-	left: 10px;
-	width: 180px;
-	height: 550px;
+#event-history {	
+	width: 100%;
+	margin-top: 2em;
 	overflow: auto;
-	margin-right: 10px;
-	background-color: white;
+	background-color: #F2F2F2;
+	box-shadow: 3px 3px 10px #DEDEDE;
+	flex: 1;
 }
 #event-history span {
 	padding-left: 5px;
 }
+/* Player "cards" representing the players */)
 #player-white {
-	position: absolute;
-	top: 84px;
-	left: 0px;
+	background: linear-gradient(to bottom, #404040, #2E2E2E); /* Standard syntax */
 }
 #player-black {
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	background-color: #EDEDED;
+	flex: 1;
+	color: white;
+	background: linear-gradient(to bottom, #404040, #2E2E2E); /* Standard syntax */
 }
+
 .player-info {
 	width: 190px;
 	margin: 2px 5px 2px 5px;
-	height: 80px;
-	background: linear-gradient(to right, #F2F2F2, white); /* Standard syntax */
+	height: 100px;
 	text-align: center;
-	border-radius: 10px;
-	border: 1px solid black;
-}
+	border-radius: 5px;;
+	border: 1px solid #CFCFCF;
+	box-shadow: 2px 2px 7px #DEDEDE;
+	
+	font-family: "courier", monospace;
+	font-weight: bold;
 
-.player-info span {
-}
 
+	/* this is used to animate changes on class */
+	-webkit-transition: all 0.8s ease;
+	-moz-transition: all 0.8s ease;
+	-o-transition: all 0.8s ease;
+	transition: all 0.8s ease;
+}
+/* This class is added with jquery to indiate active player */
+.active-player {
+	border: 1px solid #88F26D;
+	box-shadow: 3px 3px 7px #88F26D;
+}
 .player-info h3 {
 	font-size: 1em;
 }
-
+/* Cotaining the player cards */
 #player-info-container {
-	position: relative;
+	display: flex;
 }
 .column-right {
-	float: left;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+  	justify-content: center;
+
+  	margin-top: 1%;
 }
 
 .column-left {
-	width: 200px;
+	width: 400px;
 	height: 90%;
-	float: left;
-	background-color: #DEF3FA;
+	
 	margin-top: 1%;
-	margin-right: 15px;
-	margin-left: 10px;
-	border: 1px black solid;
+	margin-right: 30px;
+	margin-left: 30px;
+	
+	display: flex;
+	flex-direction: column;
+  	
 }
 
 #search-box {
@@ -82,18 +98,18 @@ body {
 #game-container {
 	width: auto;
 	height:100%;
-	margin: 0 auto;
+	display: flex;
 	/*text-align: center;*/
 }
 #go-canvas {
-	margin-top: 1%;
-	/*border: 3px solid black;*/
 	border-radius: 5px;
-	box-shadow: 0 0 25px #000;
+	box-shadow: 0 0 25px #787878;
+
 }
 
 #go-button-wrapper {
 	text-align: center;
+	flex: 1;
 }
 
 button {

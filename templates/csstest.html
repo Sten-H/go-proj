@@ -13,8 +13,6 @@
     </script>
     <script src="{{ url_for('static', filename='javascript/go.js') }}"></script>
     <script src="{{ url_for('static', filename='javascript/draw.js') }}"></script>
-    <script src="{{ url_for('static', filename='javascript/controller.js') }}"></script>
-    
   </head>
     <body>
     <div id="search-box" style="display: none">
@@ -42,11 +40,15 @@
         </div>
         <div id="event-history">
           <ul id="event-list">
+            <li>White played at 1,1</li>
+            <li>White played at 1,1</li>
           <ul>
         </div>
       </div>
       <div class="column-right">
-        <canvas id="go-canvas"></canvas>
+        <div id="canvas-wrapper">
+          <canvas id="go-canvas"></canvas>
+        </div>
         <div id="go-button-wrapper">
           <button id="pass-button">Pass</button>
           <button id="resign-button">Resign</button>
@@ -66,5 +68,18 @@
       </div>
     </div>
     <img id="wood" src="{{ url_for('static', filename='images/wood_texture.jpg') }}" alt="woodboard" style="display: none;">
+      <script>
+      canvas = document.getElementById('go-canvas');
+      ctx = canvas.getContext("2d");
+      canvas.width = canvas.height = canvas_width = $(window).innerHeight() * 0.9;
+      var board = new Board(9);
+      var board_view = new BoardView(9, canvas_width);
+      
+      function tick() {
+        //window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
+        board_view.draw(board, ctx);
+      }
+      tick();
+    </script>
   </body>
 </html>

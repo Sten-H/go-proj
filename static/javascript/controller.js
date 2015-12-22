@@ -3,6 +3,7 @@
   var canvas, ctx;
   var board_view;
   var board;
+  var names = {client: null, opponent: null};
 
   var peer = new Peer({key: 'slhk5rehnzc15rk9', 
                       config: {'iceServers': [
@@ -34,18 +35,16 @@
     $("#event-history").animate({ scrollTop: $("#event-history")[0].scrollHeight}, 1000);
   }
   //Animation effects
-  function switch_player_cards() {
-    var black_move = $('#player-black').outerHeight() * ((board.current_player == 1) ? -1 : 1);
-    var white_move = black_move * -1;
-    var black_string = "+=" + black_move.toString() + "px";
-    var white_string = "+=" + white_move.toString() + "px";
-    $('#player-black').animate({
-      top: black_string
-    }, 1000)
-    $('#player-white').animate({
-      top: white_string
-    }, 1000)
-
+  function mark_active_player() { 
+    var curr = board.current_player;
+    if(curr == 1){
+      $('#player-black').addClass('active-player');
+      $('#player-white').removeClass('active-player');
+    }
+    else {
+      $('#player-white').addClass('active-player');
+      $('#player-black').removeClass('active-player');
+    }
   }
 
   //Gameboard interactions
@@ -59,6 +58,7 @@
 
 
   function play_move(move) {
+    console.log(names);
     //Place stone
     if(board == null) // This is to prevent a situation where one player sends a move to a person who hasn't initalized his board. Can happen.
       init();
@@ -86,8 +86,7 @@
     if(move.color == player_color){
         send_data({move: move});
     }
-    if(move.resign == null)
-      switch_player_cards();
+    mark_active_player();
   }
   function winner_dialog(){
     var winner_string = (board.get_winner() == 1) ? 'Black' : 'White';
@@ -111,6 +110,12 @@
       
   }
 
+  function set_names_on_cards() {
+    console.log('gonna set');
+    $('#black-name').text((player_color == 1) ? names.client : names.opponent);
+    $('#white-name').text((player_color == 0) ? names.client : names.opponent);
+  }
+
   function init() {
     console.log('initializing game');
     if(board == null && board_view == null){
@@ -119,6 +124,8 @@
       board_view = new BoardView(size, canvas_width);
       $('#game-container').show();
       $('#search-box').hide();
+      
+      mark_active_player();
       tick();
     }
   }
@@ -156,7 +163,7 @@
         player_color = Math.round(Math.random()); // Random a color
         conn.send({id: my_id, opponent_color: player_color}); //Send info so peer can connect back
       }          
-      console.log((player_color == 1) ? 'black' : 'white');
+      conn.send({opponent_name: names.client}); //Send client nickname
       init();
     });
   }
@@ -174,6 +181,14 @@
       if(data.id != null) {
         player_color = (data.opponent_color == 1) ? 0 : 1;
         connect_to_player(data.id, false); // Connect back to peer
+      }
+
+      if(data.opponent_name != null) { // If we receive opponent name, we store it.
+        if(names.opponent == null){
+          names.opponent = data.opponent_name;
+          set_names_on_cards();
+          send_data({opponent_name: names.client});
+        }
       }
       else if(data.move != null){
         play_move(data.move);
@@ -243,6 +258,7 @@
     $('#search-button').prop('disabled', true); // Disabled until clients has acquired a peer id
     $('#search-button').click(function(){
         $('#id').val(my_id);
+        names.client = $('#username').val();
         $('#search-text').text('Searching for opponent...');
         $(this).prop('disabled', true);
     $.ajax({
