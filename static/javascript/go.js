@@ -418,8 +418,9 @@ function Board(size) {
 	}
 
 	this.player_pass = function() {
-		var last_move = history[history.length - 1]
+		var last_move = this.history[this.history.length - 1]
 		this.history.push("P");
+    console.log(last_move);
 		if (last_move == "P")
 			this.determine_winner();
 		this.switch_current_player();
