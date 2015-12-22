@@ -44,7 +44,6 @@ def search():
     if request.method == 'POST':
         id = request.form.get('id')
         size = int(request.form.get('size'))
-        print 'size:' + str(size)
         if len(player_queue) == 0:
             add_to_queue(Player(id, size))
             return json.dumps({'status': 'In queue'})
