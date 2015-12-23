@@ -5,6 +5,16 @@ body {
     margin: 0;
     font-size: 14px;
 }
+ul li .move-info {
+	color: #c77405;
+}
+ul li .chat-name {
+	color: #1c94c4;
+}
+#chat-message {
+	width: 80%; 
+	margin-left: 2%;
+}
 #event-history ul {
 	list-style: none;
 	padding: 0px;
@@ -12,7 +22,7 @@ body {
 
 #event-history ul li {
 	border-top: 1px solid #D6D6D6;
-	/*border-left: 3px solid #404040;*/
+	background-color: #FAFAFA;
 	padding: 2px 0 2px 0;
 	margin: 4px 10px 4px 10px;
 }
@@ -29,16 +39,15 @@ body {
 	padding-left: 5px;
 }
 /* Player "cards" representing the players */)
-#player-white {
+#player-white { /*This id is bugged, it doesnt get applied. if I switch order with #player-black, that one stops working. What? */
 	background: linear-gradient(to bottom, #404040, #2E2E2E); /* Standard syntax */
 }
 #player-black {
 	flex: 1;
 	color: white;
-	background: linear-gradient(to bottom, #404040, #2E2E2E); /* Standard syntax */
+	background: linear-gradient(to bottom, #4B4B4B, #2E2E2E); /* Standard syntax */
 }
-
-.player-info {
+.player-info {	
 	width: 190px;
 	margin: 2px 5px 2px 5px;
 	height: 100px;
@@ -52,10 +61,12 @@ body {
 
 
 	/* this is used to animate changes on class */
+	/*
 	-webkit-transition: all 0.8s ease;
 	-moz-transition: all 0.8s ease;
 	-o-transition: all 0.8s ease;
 	transition: all 0.8s ease;
+	*/
 }
 /* This class is added with jquery to indiate active player */
 .active-player {
@@ -112,7 +123,7 @@ body {
 	flex: 1;
 }
 
-button {
+button, input[type=submit] {
 	border-radius: 2px;
 	border: 1px solid #cccccc;
 	background-color: #f6f6f6;
@@ -121,14 +132,14 @@ button {
 	color: #1c94c4;
 	margin: 20px .5em;
 }
-button:hover {
+button:hover, input[type=submit]:hover {
 	border-color: #fbcb09;
 	background-color: #fdf5ce;
 	color: #c77405;
 }
-button:active {
+button:active, input[type=submit]:active {
 	background-color: #ffffff;
 }
-button:disabled {
+button:disabled, input[type=submit]:disabled {
 	border-color: #F7724D;
 }

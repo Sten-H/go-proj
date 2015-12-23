@@ -35,7 +35,7 @@
     </div>
     <div id="game-container" style="display: none;">
       <div class="column-left">
-      <div id="player-info-container">
+        <div id="player-info-container">
           <div id="player-black" class="player-info">
             <h3><span id="black-name">{name}</span> as Black</h3>
             <p>Captures: <span id="black-captures">0</span></p>
@@ -48,6 +48,12 @@
         <div id="event-history">
           <ul id="event-list">
           <ul>
+        </div>
+        <div>
+          <form onsubmit="return false;"> <!-- prevent form from sending, using form to get enter key functionality -->
+            <input type="textfield" id="chat-message" placeholder="Send a message">
+            <input type="submit" id="chat-send" value="Send">
+          </form>
         </div>
       </div>
       <div class="column-right">

@@ -24,15 +24,20 @@
 
   //Logging to event history and such
   function update_event_history(move){
-    var evt_string = '<li><span>';
-    var color_string = (move.color == 1) ? 'Black ' : 'White ';
+    var evt_string = '<li><span>';  
+    var current_name = "<span class='chat-name'>";
+    current_name += (move.color == player_color) ? names.client : names.opponent;
+    current_name += "</span>";
+    var color_string = (move.color == 1) ? '(Black) ' : '(White) ';
+    evt_string += current_name + color_string;
     if(move.stone != null) 
-      evt_string += color_string + 'played at ' + (move.stone.x + 1) + ', ' + (move.stone.y); 
-    
+      evt_string += 'played at ' + "<span class='move-info'>" + (move.stone.x + 1) + ', ' + (move.stone.y) + "</span>."; 
     else if(move.pass != null)
-      evt_string += color_string + 'passed';
+      evt_string += 'passed.';
     else if(move.resign != null)
-      evt_string += color_string + 'resigned. You win!'
+      evt_string += 'resigned.'
+    else if(move.msg != null)
+      evt_string += 'says: ' + move.msg;
     evt_string += '</span></li>';
     $('#event-list').append(evt_string);
     //Scroll to bottom of log
@@ -46,7 +51,7 @@
   //Animation effects
   function mark_active_player() { 
     var curr = board.current_player;
-    if(curr == 1){
+    if(curr == 1) {
       $('#player-black').addClass('active-player');
       $('#player-white').removeClass('active-player');
     }
@@ -64,7 +69,34 @@
   function change_search_button_text(text){
     $('#search-button').text(text);
   }
-
+  //Dialogs
+  function winner_dialog(){
+    var winner_string = (board.get_winner() == 1) ? 'Black' : 'White';
+    $('#winner-dialog-text').text(winner_string + ' is the winner!');
+    $('#winner-dialog').dialog({
+      dialogClass: "no-close",  
+      buttons: [
+        {
+          text: "OK",
+          click: function() { $( this ).dialog( "close" ); }
+        }
+      ]
+    });
+  }
+  function illegal_move_dialog(){
+    $('#invalid-move-dialog').dialog({
+        dialogClass: "no-close",  
+        buttons: [
+        {
+          text: "OK",
+          click: function() {
+            $( this ).dialog( "close" );
+          }
+        }
+      ]
+    });
+  }
+  
   //Gameboard interactions
   function update() {
     //?
@@ -94,39 +126,22 @@
         return;
       }
       else { //If move was legal
-        update_event_history(move);
         update_capture_text();
       }
     }
-    //Pass
     else if(move.pass != null) {
       board.player_pass();
-      update_event_history(move);
     }
     else if(move.resign != null) {
-      console.log('hello?');
       board.player_resign(move.color);
-      update_event_history(move);
       winner_dialog();
     }
     if(move.color == player_color){
         send_data({move: move});
     }
+    update_event_history(move);
     mark_active_player();
     canvas_change = true;
-  }
-  function winner_dialog(){
-    var winner_string = (board.get_winner() == 1) ? 'Black' : 'White';
-    $('#winner-dialog-text').text(winner_string + ' is the winner!');
-    $('#winner-dialog').dialog({
-      dialogClass: "no-close",  
-      buttons: [
-        {
-          text: "OK",
-          click: function() { $( this ).dialog( "close" ); }
-        }
-      ]
-    });
   }
 
   function init() {
@@ -150,21 +165,6 @@
         y: evt.clientY - rect.top
       };
   }
-
-  function illegal_move_dialog(){
-    $('#invalid-move-dialog').dialog({
-        dialogClass: "no-close",  
-        buttons: [
-        {
-          text: "OK",
-          click: function() {
-            $( this ).dialog( "close" );
-          }
-        }
-      ]
-    });
-  }
-  
   //Network functions
   var send_data = function(msg) {
     conn.send(msg);
@@ -213,6 +213,9 @@
           board.set_winner(player_color);
           winner_dialog();
         }
+      }
+      else if(data.msg != null) {
+        update_event_history({msg: data.msg, color: data.color});
       }
       else
         console.log(data);
@@ -270,7 +273,15 @@
     $(window).unload(function(){
       send_data({disconnect: true});
     });
-    
+    //Add functionality to chat button
+    $('#chat-send').click(function(){
+      var msg = $('#chat-message').val();
+      $('#chat-message').val('');
+      if(msg != ''){
+        send_data({msg: msg, color: player_color});
+        update_event_history({msg: msg, color: player_color});
+      }  
+    });
     //Add functionality to search button
     $('#search-button').prop('disabled', true); // Disabled until clients has acquired a peer id
     $('#search-button').click(function(){
