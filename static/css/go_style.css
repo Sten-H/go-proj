@@ -3,6 +3,7 @@ html, body {
 }
 body {
     margin: 0;
+    font-size: 14px;
 }
 #event-history ul {
 	list-style: none;
@@ -112,10 +113,22 @@ body {
 }
 
 button {
-	border-radius: 5px;
-	background-color: #FFF;
-	border: 1px solid black;
-	box-shadow: 2px 2px gray;
+	border-radius: 2px;
+	border: 1px solid #cccccc;
+	background-color: #f6f6f6;
+	/*box-shadow: 2px 2px gray;*/
 	font-size: 1em;
+	color: #1c94c4;
 	margin: 20px .5em;
+}
+button:hover {
+	border-color: #fbcb09;
+	background-color: #fdf5ce;
+	color: #c77405;
+}
+button:active {
+	background-color: #ffffff;
+}
+button:disabled {
+	border-color: #F7724D;
 }

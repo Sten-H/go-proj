@@ -4,8 +4,10 @@
   var board_view;
   var board;
   var names = {client: null, opponent: null};
-
-  var peer = new Peer({key: 'slhk5rehnzc15rk9', 
+  var canvas_change = true; //Rudimentary render optimization. Renders on mouse move, and on board events.
+  var peer;
+  function create_peer() {
+    peer = new Peer({key: 'slhk5rehnzc15rk9', 
                       config: {'iceServers': [
                       { url: 'stun:stun.l.google.com:19302' },
                       { url: 'stun:stun1.l.google.com:19302' },
@@ -14,6 +16,8 @@
                       { url: 'turn:homeo@turn.bistri.com:80', credential: 'homeo' },
                       ]}, 
                       debug: 2});
+  }
+  create_peer();
   var conn = null;
   var my_id;    //A token to connec to this peer
   var player_color; //Player color in the game.
@@ -52,6 +56,15 @@
     }
   }
 
+  function set_names_on_cards() {
+    $('#black-name').text((player_color == 1) ? names.client : names.opponent);
+    $('#white-name').text((player_color == 0) ? names.client : names.opponent);
+  }
+
+  function change_search_button_text(text){
+    $('#search-button').text(text);
+  }
+
   //Gameboard interactions
   function update() {
     //?
@@ -61,9 +74,16 @@
     board_view.draw(board, ctx); 
   }
 
+  function tick() {
+    window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
+    update();
+    if(canvas_change)
+      render();
+    canvas_change = false;
+  }
+
 
   function play_move(move) {
-    console.log(names);
     //Place stone
     if(board == null) // This is to prevent a situation where one player sends a move to a person who hasn't initalized his board. Can happen.
       init();
@@ -93,6 +113,7 @@
         send_data({move: move});
     }
     mark_active_player();
+    canvas_change = true;
   }
   function winner_dialog(){
     var winner_string = (board.get_winner() == 1) ? 'Black' : 'White';
@@ -108,20 +129,6 @@
     });
   }
 
-  function tick() {
-      window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
-      update();
-      render();
-    
-      
-  }
-
-  function set_names_on_cards() {
-    console.log('gonna set');
-    $('#black-name').text((player_color == 1) ? names.client : names.opponent);
-    $('#white-name').text((player_color == 0) ? names.client : names.opponent);
-  }
-
   function init() {
     console.log('initializing game');
     if(board == null && board_view == null){
@@ -135,6 +142,7 @@
       tick();
     }
   }
+
   function get_mouse_pos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
@@ -169,7 +177,7 @@
         player_color = Math.round(Math.random()); // Random a color
         conn.send({id: my_id, opponent_color: player_color}); //Send info so peer can connect back
       }          
-      conn.send({opponent_name: names.client}); //Send client nickname
+      conn.send({opponent_name: names.client}); //Send client nickname.
       init();
     });
   }
@@ -213,7 +221,10 @@
 
   peer.on('error', function(err){
     console.log(err);
-    location.reload(); // FIXME this is sort of a hack. Matching probably failed because received id was dead, 
+    $('body').append("<div class='ui-state-error'> An error occured connecting to opponent. Please try again. Sorry :(");
+    $('#search-button').prop('disabled', false);
+    $('#search-text').text('Welcome! Press the search button to find an opponent');
+    //location.reload(); // FIXME this is sort of a hack. Matching probably failed because received id was dead, 
                        // both ids are removed this way and client gets a new one. User should atleast be informed somehow what happened.
   });
 
@@ -231,7 +242,6 @@
     //Add listener to resign button
     $('#resign-button').click(function(){
       if( board.winner == null) {
-        console.log('listener');
         play_move({resign: true, color: player_color});
       }
     });
@@ -239,6 +249,7 @@
     $(canvas).mousemove(function(e){
       var mouse_pos = get_mouse_pos(canvas, e);
       board_view.update_mouse_marker(mouse_pos.x, mouse_pos.y);
+      canvas_change = true;
     });
     //Detect mouse click
     $(canvas).click(function(e) {
@@ -263,6 +274,7 @@
     //Add functionality to search button
     $('#search-button').prop('disabled', true); // Disabled until clients has acquired a peer id
     $('#search-button').click(function(){
+        $('.ui-state-error').remove();
         $('#id').val(my_id);
         names.client = $('#username').val();
         $('#search-text').text('Searching for opponent...');
@@ -281,5 +293,5 @@
         }
       }); //End of Ajax
     }); //End of search button
-  });
+  }); //End of document ready
 }());
