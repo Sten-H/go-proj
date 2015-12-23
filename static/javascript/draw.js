@@ -124,7 +124,7 @@ function BoardView(tile_amount, canvas_width) {
     this.draw_board_lines(ctx);
     this.draw_mouse_marker(ctx, board.current_player);
     //draw stones
-    var stones = board.get_stones();
+    var stones = board.stones;
     for(var x = 0; x < this.tile_amount; x++)
       for(var y = 0; y < this.tile_amount; y++)
         if(stones[x][y] != null)

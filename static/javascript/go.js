@@ -37,7 +37,7 @@ function Board(size) {
 		this.stones[i] = new Array(this.size);
 	this.history = new Array();
 	this.winner = null;
-	//this.captures = {black: 0, white: 0};
+	//Captures stones for each player. Could be a list later, for visualisation. Now only to count score.
 	this.cap_white = 0;
 	this.cap_black = 0;
 	/**
@@ -56,9 +56,6 @@ function Board(size) {
 		else {
 			return 7;
 		}
-	}
-	this.get_stones = function() { // FIXME Look in to who uses this. Should atleast slice it before returning?
-		return this.stones;
 	}
 	this.set_winner = function(color) {
 		this.winner = color;

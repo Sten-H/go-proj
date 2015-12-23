@@ -18,7 +18,7 @@
   var my_id;    //A token to connec to this peer
   var player_color; //Player color in the game.
 
-  //Logging to event history
+  //Logging to event history and such
   function update_event_history(move){
     var evt_string = '<li><span>';
     var color_string = (move.color == 1) ? 'Black ' : 'White ';
@@ -33,6 +33,11 @@
     $('#event-list').append(evt_string);
     //Scroll to bottom of log
     $("#event-history").animate({ scrollTop: $("#event-history")[0].scrollHeight}, 1000);
+  }
+
+  function update_capture_text() {
+    $('#black-captures').text(board.cap_black);
+    $('#white-captures').text(board.cap_white);
   }
   //Animation effects
   function mark_active_player() { 
@@ -70,6 +75,7 @@
       }
       else { //If move was legal
         update_event_history(move);
+        update_capture_text();
       }
     }
     //Pass
