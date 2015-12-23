@@ -12,7 +12,19 @@ BBEE
 EEWW
 EEWE
  */
-
+var board_advanced_capture = 'EBWEBBWEWWWWEEWE'
+/*
+EBWE
+BBWE
+WWWW
+EEWE
+ */
+var board_simple_capture = 'EBEEWBEBE'
+/*
+EBE
+EWB
+EBE
+*/
 var sixbysix_bicolor = 'EEEEBEBBBBBEEEBWWWEEBWEEEEBWEEBBBWWW';
 /*
 EEEEBE
@@ -38,15 +50,12 @@ function board_with_placement(placement) {
 		else if(char == 'B')
 			board.place_stone_forced(pos.x, pos.y, 1);
 	}
+	board.count_all_liberties();
 	return board;
 }
 /**
  * At the end of the game the board's empty spaces will be filled with score stones.
  */
-QUnit.test("Hello test", function(assert) {
-	assert.ok(1 == "1", "Passed!");
-});
-
 QUnit.test('Score Stones fill test', function(assert) {
 	var simple_board = board_with_placement(simple_board_monocolor);
 	var medium_board = board_with_placement(board_bicolor);
@@ -86,8 +95,7 @@ QUnit.test('Determine winner, medium complexity board', function(assert) {
 });
 
 QUnit.test('Test board setup with string', function(assert){
-	var placement = 'EBEEBBEEEEWWEEWE';
-	var board = board_with_placement('EBEEBBEEEEWWEEWE');
+	var board = board_with_placement(board_bicolor);
 	
 	assert.equal(board.get_stones_length(), 6, 'stones.length, 6; equal succeeded')
 	var score = board.area_score();
@@ -95,7 +103,32 @@ QUnit.test('Test board setup with string', function(assert){
 	assert.equal(score.white, 4, 'score.white, 4; equal succeeded');
 });
 
+QUnit.test('Test illegal to place on occupied space', function(assert){
+	var board = board_with_placement(simple_board_monocolor);
+	assert.notOk(board.place_stone(0,1), 'Success; Illegal to place on occupied tile');
+});
 
+QUnit.test('Test suicidal move not allowed', function(assert) {
+	var board = board_with_placement(board_bicolor);
+	var board_six = board_with_placement(sixbysix_bicolor);
+	board.current_player = 0;
+	assert.notOk(board.place_stone(0, 0), 'Success; suicidal move was not legal for white');
+	board.current_player = 1;
+	assert.notOk(board_six.place_stone(3, 3), 'Success,; suicidal move was not legal for black');
+});
+
+QUnit.test('Test capture', function(assert) {
+	var board_simple = board_with_placement(board_simple_capture);
+	var board_advanced = board_with_placement(board_advanced_capture);
+	//Black to capture 1 stone.
+	board_simple.current_player = 1;
+	board_simple.place_stone(0,1)
+	assert.equal(board_simple.cap_black, 1, 'captures.black, 1; equal succeded');
+	//White to capture 3 stones, suicidal move if not capture, advanced.
+	board_advanced.current_player = 0;
+	board_advanced.place_stone(0,0);
+	assert.equal(board_advanced.cap_white, 3, 'captures.white, 3; equal succeded');
+});
 /*
 (0,0)(1,0)(2,0)(3,0)
 (0,1)(1,1)(2,1)(3,1)

@@ -1,18 +1,11 @@
-var dir = [{
-	x: 1,
-	y: 0
-}, {
-	x: -1,
-	y: 0
-}, {
-	x: 0,
-	y: 1
-}, {
-	x: 0,
-	y: -1
-}];
-var ndir = dir.slice(); //copy array
-ndir.push({x: 0, y: 0}); 
+//These directions are used quite often for searching areas.
+var dir = [{x: 1, y: 0}, 
+					 {x: -1, y: 0}, 
+					 {x: 0, y: 1},
+					 {x: 0, y: -1}]; //Cross direction excluding middle
+var ndir = dir.slice();
+ndir.push({x: 0, y: 0}); //Cross direction with middle coord.
+
 /**
  * @param {[type]}
  * @param {[type]}
@@ -44,6 +37,9 @@ function Board(size) {
 		this.stones[i] = new Array(this.size);
 	this.history = new Array();
 	this.winner = null;
+	//this.captures = {black: 0, white: 0};
+	this.cap_white = 0;
+	this.cap_black = 0;
 	/**
 	 * Returns komi (extra score for white) based on board size. Not sure what to set this to
 	 * for any board size, so it's all (almost) the same for now.
@@ -83,17 +79,10 @@ function Board(size) {
 	}
 
 	this.tile_occupied = function(x, y) {
-		if (this.stones[x][y] != null)
-			return true;
-		else
-			return false;
+		return (this.stones[x][y] != null)
 	}
 	this.legal_coordinate = function(x, y) {
-		if (x >= 0 && x < this.size && y >= 0 && y < this.size)
-			return true;
-		else {
-			return false;
-		}
+		return (x >= 0 && x < this.size && y >= 0 && y < this.size)
 	}
 	this.count_liberties = function(x, y) {
 		if (this.tile_occupied(x, y)) {
@@ -109,16 +98,20 @@ function Board(size) {
 		} else
 			return;
 	}
-
+	/**
+	 * Recalculates the liberties surrounding a coordinate. Usually done after a stone placement on x, y.
+	 * @param  {Number} x - x coord
+	 * @param  {Number} y - y coord
+	 */
 	this.recalculate_neighbouring_stone_liberties = function(x, y) {
-		for (var i = -1; i <= 1; i += 2) {
-			if (this.legal_coordinate(x + i, y))
-				this.count_liberties(x + i, y);
-			if (this.legal_coordinate(x, y + i))
-				this.count_liberties(x, y + i);
+		for(var i = 0; i < dir.length; i++){
+			if(this.legal_coordinate(x + dir[i].x, y + dir[i].y))
+				this.count_liberties(x + dir[i].x, y + dir[i].y);
 		}
 	}
-
+	/**
+	 * Counts the liberties of all stones. This should be done sparingly.
+	 */
 	this.count_all_liberties = function() {
 		for (var x = 0; x < this.size; x++)
 			for (var y = 0; y < this.size; y++)
@@ -134,9 +127,9 @@ function Board(size) {
 				if (this.tile_occupied(x, y))
 					this.stones[x][y].visited = false;
 	}
-		/**
-		 *Removes 1 stone from play, this removal updates liberties locally. quick. Used for undo.
-		 */
+	/**
+	 *Removes 1 stone from play, this removal updates liberties locally. quick. Used for undo.
+	 */
 	this.remove_stone = function(stone) {
 		this.stones[stone.x][stone.y] = null;
 		this.recalculate_neighbouring_stone_liberties(stone.x, stone.y);
@@ -152,6 +145,7 @@ function Board(size) {
 	 *optimization not to find the group of stones.
 	 */	
 	this.recursive_group_search = function(queue, liberties, visited) {
+		//FIXME think this can be clean up a great deal. Visited stone is pushed several times?
 		if (queue.length < 1) {
 			return {
 				is_dead: (liberties == 0) ? true : false,
@@ -160,6 +154,8 @@ function Board(size) {
 			};
 		}
 		var stone = queue.shift();
+		if($.inArray(stone, visited) != -1)
+			return this.recursive_group_search(queue, liberties, visited);
 		liberties += stone.liberty_count;
 		visited.push(stone);
 		for (var i = 0; i < dir.length; i++) {
@@ -169,7 +165,7 @@ function Board(size) {
 				var neighbour = this.stones[new_x][new_y];
 				if (neighbour.color == stone.color && neighbour.visited == false) {
 					queue.push(neighbour);
-					visited.push(neighbour);
+					//visited.push(neighbour);
 					neighbour.visited = true;
 				}
 			}
@@ -178,10 +174,8 @@ function Board(size) {
 	}
 
 	this.get_group_info = function(x, y) {
-		var queue = new Array();
-		queue.push(this.stones[x][y]);
 		this.stones[x][y].visited = true;
-		var group_info = this.recursive_group_search(queue, 0, [this.stones[x][y]]);
+		var group_info = this.recursive_group_search([this.stones[x][y]], 0, []);
 		return group_info;
 	}
 	/**
@@ -213,12 +207,19 @@ function Board(size) {
 	 * @param {}
 	 */
 	this.remove_dead_groups = function(dead_groups) {
-		if (dead_groups.length == 0)
+		if (dead_groups.length == 0) // do nothing if no dead groups.
 			return;
 		var enemy_color = dead_groups[0].color; //We only remove enemy, if current player has dead group, it will live.
 		for (var i = 0; i < dead_groups.length; i++) {
-			if (dead_groups[i].color == enemy_color)
+			if (dead_groups[i].color == enemy_color){
+				if(this.current_player == 1){
+					this.cap_black += dead_groups[i].group.length;
+				}
+				else {
+					this.cap_white += dead_groups[i].group.length;
+				}
 				this.remove_group(dead_groups[i].group);
+			}
 		}
 	}
 	/**

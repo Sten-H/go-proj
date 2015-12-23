@@ -13,7 +13,7 @@ body {
 	border-top: 1px solid #D6D6D6;
 	/*border-left: 3px solid #404040;*/
 	padding: 2px 0 2px 0;
-	margin: 4px 0 4px 0;
+	margin: 4px 10px 4px 10px;
 }
 
 #event-history {	
@@ -99,7 +99,6 @@ body {
 	width: auto;
 	height:100%;
 	display: flex;
-	/*text-align: center;*/
 }
 #go-canvas {
 	border-radius: 5px;
