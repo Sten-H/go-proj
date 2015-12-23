@@ -13,7 +13,6 @@
                       { url: 'stun:stun1.l.google.com:19302' },
                       { url: 'stun:stun2.l.google.com:19302' },
                       { url: 'stun:stun3.l.google.com:19302' },
-                      { url: 'turn:homeo@turn.bistri.com:80', credential: 'homeo' },
                       ]}, 
                       debug: 2});
   }
@@ -167,7 +166,8 @@
   }
   //Network functions
   var send_data = function(msg) {
-    conn.send(msg);
+    if(conn != null)
+      conn.send(msg);
   }
 
   var connect_to_player = function(id, request_connect_back){
@@ -227,10 +227,22 @@
     $('body').append("<div class='ui-state-error'> An error occured connecting to opponent. Please try again. Sorry :(");
     $('#search-button').prop('disabled', false);
     $('#search-text').text('Welcome! Press the search button to find an opponent');
-    //location.reload(); // FIXME this is sort of a hack. Matching probably failed because received id was dead, 
                        // both ids are removed this way and client gets a new one. User should atleast be informed somehow what happened.
   });
-
+  function search_match() {
+    $.ajax({
+    type : "POST",
+    url : SCRIPT_ROOT + "/search",
+    data: $('#search-form').serialize(),
+    success: function(result) {
+            if(result['id'] != null)
+                connect_to_player(result['id'], true);
+        },
+    error: function(error) {
+      console.log(error);
+    }
+  }); //End of Ajax
+  }
   $(function() {  //document ready short
     canvas = document.getElementById('go-canvas');
     canvas.width = canvas.height = canvas_width = $(window).innerHeight() * 0.9;
@@ -290,19 +302,7 @@
         names.client = $('#username').val();
         $('#search-text').text('Searching for opponent...');
         $(this).prop('disabled', true);
-    $.ajax({
-        type : "POST",
-        url : SCRIPT_ROOT + "/search",
-        data: $('#search-form').serialize(),
-        success: function(result) {
-                console.log(result)
-                if(result['id'] != null)
-                    connect_to_player(result['id'], true);
-            },
-        error: function(error) {
-          console.log(error);
-        }
-      }); //End of Ajax
+        search_match();
     }); //End of search button
   }); //End of document ready
 }());
