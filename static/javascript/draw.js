@@ -22,8 +22,8 @@ function draw_stone(stone, tile_size, offset, ctx) {
     var midpoint_y = stone.y * tile_size + offset;
       
     ctx.shadowBlur=tile_size*0.15;
-    ctx.shadowOffsetY=tile_size*0.05;
-    ctx.shadowOffsetX=tile_size*0.05;
+    ctx.shadowOffsetY=tile_size*0.04;
+    ctx.shadowOffsetX=tile_size*0.04;
     ctx.shadowColor="#4F4F4F";
 
     ctx.arc(midpoint_x, midpoint_y, tile_size / 2, 0, 2 * Math.PI );
@@ -33,13 +33,6 @@ function draw_stone(stone, tile_size, offset, ctx) {
     ctx.shadowBlur=0;
     ctx.shadowOffsetY=0;
     ctx.shadowOffsetX=0;
-
-    //Draw liberty count on top. Just to spot errors easier.
-    /*
-    ctx.font = "12px Arial";
-    ctx.fillStyle = (stone.color == 1) ? 'white' : 'black';
-    ctx.fillText(stone.liberty_count, midpoint_x, midpoint_y);
-    */
 }
 
 function BoardView(tile_amount, canvas_width) {

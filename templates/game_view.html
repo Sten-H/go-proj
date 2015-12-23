@@ -8,6 +8,8 @@
     <script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
     <script src="{{ url_for('static', filename='javascript/go.js') }}"></script>
     <script src="{{ url_for('static', filename='javascript/draw.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/gui.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/network.js') }}"></script>
     <script src="{{ url_for('static', filename='javascript/controller.js') }}"></script>
     <script>
       SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
