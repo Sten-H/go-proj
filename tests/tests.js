@@ -71,6 +71,7 @@ QUnit.test('Simple area score test, 1 color', function(assert) {
 	var score = board.area_score();
 	
 	assert.equal(score.black, 4, 'score.black, 4; equal succeeded');
+	assert.equal(score.white, 0, 'score.white, 0; equal succeeded');
 });
 
 QUnit.test('Slightly less simple area score test, 2 colors', function(assert) {
@@ -98,7 +99,7 @@ QUnit.test('Test score with with captures', function(assert) {
 QUnit.test('Determine winner, medium complexity board, no captures', function(assert) {
 	var board_six = board_with_placement(sixbysix_bicolor);
 	var winner = board_six.determine_winner();
-	console.log(board_six.final_score);
+	
 	assert.equal(winner, 1, 'winner, 1; equal succeeded');
 });
 

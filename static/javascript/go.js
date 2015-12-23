@@ -7,9 +7,9 @@ var ndir = dir.slice();
 ndir.push({x: 0, y: 0}); //Cross direction with middle coord.
 
 /**
- * @param {[type]}
- * @param {[type]}
- * @param {Number} color - color 1 is black color 0 is white. for scoring -1 is neutral, 2 is white, 3 is black.
+ * @param {Number} x - x-coord
+ * @param {Number} y - y-coord
+ * @param {Number} color - color 1 is black color 0 is white. for scoring -1 is neutral, 2 is white score, 3 is black score.
  */
 function Stone(x, y, color) {
 	this.x = x;
@@ -28,7 +28,47 @@ function Stone(x, y, color) {
 		return this.y;
 	}
 }
-
+/**
+ * Used for finding dead groups
+ * @param {Array} stones - Group starting stones
+ */
+function Group(stones) {
+	this.stones = stones;
+	this.color = null;
+	this.liberties = 0;
+	this.length = function() { return this.stones.length; }
+	this.add = function(stone) {
+		if(this.color == null)
+			this.color = stone.color;
+		this.stones.push(stone);
+		this.liberties += stone.liberty_count;
+	}
+	this.is_dead = function() { return (this.liberties == 0); }
+}
+function ScoreGroup(stones) {
+	this.stones = stones;
+	this.colors_found = { black: false, white: false };
+	this.length = function() { return this.stones.length; }
+	this.add_color = function(color) {
+		if(color == 1)
+			this.colors_found.black = true;
+		else if(color == 0)
+			this.colors_found.white = true;
+	}
+	this.color = function() {
+		if(this.colors_found.black == true && this.colors_found.white == false)
+			return 1;
+		else if(this.colors_found.black == false && this.colors_found.white == true)
+			return 0;
+		else
+			return -1; // Neutral group
+	}
+	this.add = function(stone) { this.stones.push(stone);}
+}
+/**
+ * The go board, with rules.
+ * @param {Number} size - Size of board
+ */
 function Board(size) {
 	this.size = size;
 	this.current_player = 1;
@@ -64,6 +104,7 @@ function Board(size) {
 	this.get_winner = function() {
 		return this.winner;
 	}
+
 	this.get_stones_length = function() {
 		var length = 0;
 		for (var x = 0; x < this.size; x++)
@@ -79,17 +120,33 @@ function Board(size) {
 	this.tile_occupied = function(x, y) {
 		return (this.stones[x][y] != null)
 	}
+	/**
+	 * Player passes his turn, game ends on two consecutive passes.
+	 * @return {[type]} [description]
+	 */
+	this.player_pass = function() {
+		var last_move = this.history[this.history.length - 1]
+		this.history.push("P");
+		if (last_move == "P")
+			this.determine_winner();
+		this.switch_current_player();
+	}
+
+	this.player_resign = function(color) {
+		this.history.push("R W");
+		this.set_winner((color == 1) ? 0 : 1);
+	}
 	this.legal_coordinate = function(x, y) {
 		return (x >= 0 && x < this.size && y >= 0 && y < this.size)
 	}
+
 	this.count_liberties = function(x, y) {
 		if (this.tile_occupied(x, y)) {
 			var liberties = 0;
 			var stone = this.stones[x][y];
-			for (var i = -1; i <= 1; i += 2) {
-				if (this.legal_coordinate(x + i, y) && !this.tile_occupied(x + i, y))
-					liberties++;
-				if (this.legal_coordinate(x, y + i) && !this.tile_occupied(x, y + i))
+			for( var i = 0; i < dir.length; i++) {
+				var new_dir = { x: x + dir[i].x, y: y + dir[i].y };
+				if (this.legal_coordinate(new_dir.x, new_dir.y) && !this.tile_occupied(new_dir.x, new_dir.y))
 					liberties++;
 			}
 			stone.set_liberty_count(liberties);
@@ -115,16 +172,6 @@ function Board(size) {
 			for (var y = 0; y < this.size; y++)
 				this.count_liberties(x, y);
 	}
-
-	/**
-	 *Sets the visited property of each stone to false. Should be done after each new stone has been settled.
-	 */
-	this.reset_visited = function() {
-		for (var x = 0; x < this.size; x++)
-			for (var y = 0; y < this.size; y++)
-				if (this.tile_occupied(x, y))
-					this.stones[x][y].visited = false;
-	}
 	/**
 	 *Removes 1 stone from play, this removal updates liberties locally. quick. Used for undo.
 	 */
@@ -137,25 +184,34 @@ function Board(size) {
 		for (var i = 0; i < group.length; i++)
 			this.stones[group[i].x][group[i].y] = null;
 	}
+
+	this.undo_last_move = function() {
+		var last_stone = this.history.pop();
+		this.remove_stone(last_stone);
+	}
+	/**
+	 *Sets the visited property of each stone to false. Should be done after each new stone has been settled.
+	 */
+	this.reset_visited = function() {
+		for (var x = 0; x < this.size; x++)
+			for (var y = 0; y < this.size; y++)
+				if (this.tile_occupied(x, y))
+					this.stones[x][y].visited = false;
+	}
 	/**
 	 *Finds entire groups of stones recursively. the visited array that is passed in the paramaters
 	 *is the actual stones visited in the end. The visited property on each stone is used for search 
 	 *optimization not to find the group of stones.
 	 */	
-	this.recursive_group_search = function(queue, liberties, visited) {
+	this.recursive_group_search = function(queue, group) {
 		//FIXME think this can be clean up a great deal. Visited stone is pushed several times?
 		if (queue.length < 1) {
-			return {
-				is_dead: (liberties == 0) ? true : false,
-				group: visited,
-				color: visited[0].color
-			};
+			return group;
 		}
 		var stone = queue.shift();
-		if($.inArray(stone, visited) != -1)
-			return this.recursive_group_search(queue, liberties, visited);
-		liberties += stone.liberty_count;
-		visited.push(stone);
+		if($.inArray(stone, group.stones) != -1)
+			return this.recursive_group_search(queue, group);
+		group.add(stone);
 		for (var i = 0; i < dir.length; i++) {
 			var new_x = Number(stone.x + dir[i].x);
 			var new_y = Number(stone.y + dir[i].y);
@@ -163,17 +219,22 @@ function Board(size) {
 				var neighbour = this.stones[new_x][new_y];
 				if (neighbour.color == stone.color && neighbour.visited == false) {
 					queue.push(neighbour);
-					//visited.push(neighbour);
 					neighbour.visited = true;
 				}
 			}
 		}
-		return this.recursive_group_search(queue, liberties, visited);
+		return this.recursive_group_search(queue, group);
 	}
-
+	/**
+	 * Gets the group (if any) beginning with the stone on x, y coord
+	 * @param  {Number} x - x-coord
+	 * @param  {Number} y - y-coord
+	 * @return {Group} returns a Group object
+	 */
 	this.get_group_info = function(x, y) {
 		this.stones[x][y].visited = true;
-		var group_info = this.recursive_group_search([this.stones[x][y]], 0, []);
+		var group = new Group([]);
+		var group_info = this.recursive_group_search([this.stones[x][y]], group);
 		return group_info;
 	}
 	/**
@@ -211,12 +272,12 @@ function Board(size) {
 		for (var i = 0; i < dead_groups.length; i++) {
 			if (dead_groups[i].color == enemy_color){
 				if(this.current_player == 1){
-					this.cap_black += dead_groups[i].group.length;
+					this.cap_black += dead_groups[i].length();
 				}
 				else {
-					this.cap_white += dead_groups[i].group.length;
+					this.cap_white += dead_groups[i].length();
 				}
-				this.remove_group(dead_groups[i].group);
+				this.remove_group(dead_groups[i].stones);
 			}
 		}
 	}
@@ -245,21 +306,18 @@ function Board(size) {
 	this.get_dead_groups = function(x, y) {
 		var groups = this.get_area_groups(x, y); // Gets all groups in area
 		var dead_groups = groups.filter(function(g) {
-			return g.is_dead == true; //Filter out alive groups
+			return g.is_dead() == true; //Filter out alive groups
 		});
 		this.reset_visited(); //We have traversed the groups for this update. This could be optimized by only reseting visited (var groups) stones.
 		return dead_groups;
 	}
 	/**
 	 * Checks if move is self-harming by looking at the dead groups created by latest move.
-	 * @param  {array} dead_groups - all groups that are now dead after last placed stone.
+	 * @param  {Group} dead_groups - all groups that are now dead after last placed stone.
 	 * @return {boolean} returns true if move only kills stones of current player
 	 */
 	this.suicide_move = function(dead_groups) {
-		if (dead_groups.length >= 1 && dead_groups[0].color == this.current_player)
-			return true;
-		else
-			return false;
+		return (dead_groups.length >= 1 && dead_groups[0].color == this.current_player)
 	}
 	/**
 	 * Removes dead stones, recounts liberties of remaining stones. Board ready for next turn.
@@ -305,32 +363,31 @@ function Board(size) {
 		}
 		return count;
 	}
-	this.recursive_group_score = function(queue, visited, colors_found) {
+	/**
+	 * A breadth first search to find a group, starting from the first stone in queue.
+	 * Collects information needed for scoring in ScoreGroup object.
+	 * @param  {Array} queue - Queue used for breadth first search
+	 * @param  {ScoreGroup} group - The group that is built up through
+	 * @return {[type]}       [description]
+	 */
+	this.recursive_group_score = function(queue, group) {
 		if (queue.length < 1)
-			return {
-				group: visited,
-				colors: colors_found
-			};
+			return group;
 		var stone = queue.pop();
-		stone.visited = true;
-		visited.push(stone);
+		group.add(stone);
 		for (var i = 0; i < dir.length; i++) {
-			var curr_dir = {
-				x: stone.x + dir[i].x,
-				y: stone.y + dir[i].y
-			};
+			var curr_dir = { x: stone.x + dir[i].x, y: stone.y + dir[i].y };
 			if (this.legal_coordinate(curr_dir.x, curr_dir.y)) {
 				var neighbour = this.stones[curr_dir.x][curr_dir.y];
 				if (neighbour.color == -1 && neighbour.visited == false) {
 					queue.push(neighbour)
 					neighbour.visited = true;
-				} else if (neighbour.color == 1)
-					colors_found.black = true;
-				else if (neighbour.color == 0)
-					colors_found.white = true;
+				} 
+				else
+					group.add_color(neighbour.color);
 			}
 		}
-		return this.recursive_group_score(queue, visited, colors_found);
+		return this.recursive_group_score(queue, group);
 	}
 	/**
 	 * Scores the game and sets the winner accordingly. Scoring will be done according to chinese rules of go
@@ -338,21 +395,26 @@ function Board(size) {
 	 * @return {dict} returns a dict with white and black score without komi, this is only used for testing.
 	 */
 	this.area_score = function() {
+		this.reset_visited(); // Probably best to do this, so it's clean after life check of last move.
 		var bscore = 0;
 		var wscore = 0; // + komi whatever that is
 		var score_stones = this.place_score_stones();
 		var score_groups = new Array();
 		
+		//Gather all score groups (areas that are owned by someone)
 		while(score_stones.length >= 1){
 			active_stone = score_stones.pop();
-			if(active_stone.visited != true)
-				score_groups.push(this.recursive_group_score([active_stone], [], {black: false, white: false}));
+			if(active_stone.visited != true) {
+				active_stone.visited = true;
+				score_groups.push(this.recursive_group_score([active_stone], new ScoreGroup([])));
+			}
 		}
+		//Count score of areas
 		for(var i = 0; i < score_groups.length; i++){
-			if(score_groups[i].colors.black == true && score_groups[i].colors.white == false)
-				bscore += score_groups[i].group.length;
-			else if(score_groups[i].colors.black == false && score_groups[i].colors.white == true)
-				wscore += score_groups[i].group.length;
+			if(score_groups[i].color() == 1)
+				bscore += score_groups[i].length();
+			else if(score_groups[i].color() == 0)
+				wscore += score_groups[i].length();
 		}
 		//Count the placed stones, 1p each.
 		placed_stones = this.count_player_stones();
@@ -366,10 +428,10 @@ function Board(size) {
 	/**
 	 * Adds komi to area scoring and determines winner.
 	 * @param {dict} score - contains .black .white scores, WITHOUT komi
-	 * @return {}
+	 * @return {Number}
 	 */
-	this.determine_winner = function(score) {
-		score = this.area_score();
+	this.determine_winner = function() {
+		var score = this.area_score();
 		var komi = this.get_komi();
 		score.black += this.cap_black;
 		score.white += this.cap_white + komi;
@@ -383,16 +445,19 @@ function Board(size) {
 		this.final_score = score;
 		return this.winner;
 	}
-	this.undo_last_move = function() {
-		var last_stone = this.history.pop();
-		this.remove_stone(last_stone);
-	}
 
 	//This is only used for testing purposes to set up scoring situations. Does no validty checks, no life check.
 	this.place_stone_forced = function(x, y, color) {
 		var new_stone = new Stone(x, y, color);
 		this.stones[x][y] = new_stone;
 	}
+	/**
+	 * Places stone on the x,y coordinates and then tries the board for possible self-harming move.
+	 * Returns false if stone is placed on occupied tile, or move is self-harming.
+	 * @param  {Number} x - x-coord
+	 * @param  {Number} y - y-coord
+	 * @return {boolean}  returns true if move was legal, else false.
+	 */
 	this.place_stone = function(x, y) {
 		if (!this.tile_occupied(x, y)) {
 			var new_stone = new Stone(x, y, this.current_player);
@@ -415,21 +480,5 @@ function Board(size) {
 		} 
 		else
 			return false; //Tried to place on an existing stone
-	}
-	/**
-	 * Player passes his turn, game ends on two consecutive passes.
-	 * @return {[type]} [description]
-	 */
-	this.player_pass = function() {
-		var last_move = this.history[this.history.length - 1]
-		this.history.push("P");
-		if (last_move == "P")
-			this.determine_winner();
-		this.switch_current_player();
-	}
-
-	this.player_resign = function(color) {
-		this.history.push("R W");
-		this.set_winner((color == 1) ? 0 : 1);
 	}
 }
