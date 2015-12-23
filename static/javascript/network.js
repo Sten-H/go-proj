@@ -73,7 +73,9 @@ peer.on('connection', function(connection) {
 
 peer.on('error', function(err){
   console.log(err);
-  $('body').append("<div class='ui-state-error'> An error occured connecting to opponent. Please try again. Sorry :(");
+  $('body').append("<div class='ui-state-error'> An error occured connecting to opponent. Please try again. Sorry :(</div>");
+  $('body').append("<div class='ui-state-error'>" + err + "</div>");
+
   $('#search-button').prop('disabled', false);
   $('#search-text').text('Welcome! Press the search button to find an opponent');
                      // both ids are removed this way and client gets a new one. User should atleast be informed somehow what happened.
