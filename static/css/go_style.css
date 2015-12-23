@@ -35,17 +35,17 @@ ul li .chat-name {
 	box-shadow: 3px 3px 10px #DEDEDE;
 	flex: 1;
 }
+/* Player "cards" representing the players */)
 #event-history span {
 	padding-left: 5px;
-}
-/* Player "cards" representing the players */)
-#player-white { /*This id is bugged, it doesnt get applied. if I switch order with #player-black, that one stops working. What? */
-	background: linear-gradient(to bottom, #404040, #2E2E2E); /* Standard syntax */
 }
 #player-black {
 	flex: 1;
 	color: white;
-	background: linear-gradient(to bottom, #4B4B4B, #2E2E2E); /* Standard syntax */
+	background: linear-gradient(to bottom, #4B4B4B, #222222);
+}
+#player-white {
+	background: linear-gradient(to bottom, #FAFAFA, #E8E8E8); !important /*Why do I need !important ?*/
 }
 .player-info {	
 	width: 190px;
@@ -55,18 +55,16 @@ ul li .chat-name {
 	border-radius: 5px;;
 	border: 1px solid #CFCFCF;
 	box-shadow: 2px 2px 7px #DEDEDE;
-	
 	font-family: "courier", monospace;
 	font-weight: bold;
 
 
 	/* this is used to animate changes on class */
-	/*
+	
 	-webkit-transition: all 0.8s ease;
 	-moz-transition: all 0.8s ease;
 	-o-transition: all 0.8s ease;
 	transition: all 0.8s ease;
-	*/
 }
 /* This class is added with jquery to indiate active player */
 .active-player {
