@@ -25,7 +25,7 @@ EBE
 EWB
 EBE
 */
-var sixbysix_bicolor = 'EEEEBEBBBBBEEEBWWWEEBWEEEEBWEEBBBWWW';
+var sixbysix_bicolor = 'EEEEBEBBBBBEEEBWWWEEBWEEEEBWEEBBBWWW'; //score b: 22, 12 + komi(8) = 20
 /*
 EEEEBE
 BBBBBE
@@ -66,14 +66,14 @@ QUnit.test('Score Stones fill test', function(assert) {
 
 });
 
-QUnit.test('Simple score test, 1 color', function(assert) {
+QUnit.test('Simple area score test, 1 color', function(assert) {
 	var board = board_with_placement(simple_board_monocolor);
 	var score = board.area_score();
 	
 	assert.equal(score.black, 4, 'score.black, 4; equal succeeded');
 });
 
-QUnit.test('Slightly less simple score test, 2 colors', function(assert) {
+QUnit.test('Slightly less simple area score test, 2 colors', function(assert) {
 	var board = board_with_placement(board_bicolor);
 	var score = board.area_score();
 	var board_six = board_with_placement(sixbysix_bicolor);
@@ -86,11 +86,19 @@ QUnit.test('Slightly less simple score test, 2 colors', function(assert) {
 	assert.equal(score_six.white, 12, 'score.white, 12; equal succeeded');
 });
 
-QUnit.test('Determine winner, medium complexity board', function(assert) {
-	var board = board_with_placement(board_bicolor);
+QUnit.test('Test score with with captures', function(assert) {
+	var board = board_with_placement(board_simple_capture);
+	board.place_stone(0, 1);
+	var winner = board.determine_winner();
+	
+	assert.equal(board.final_score.black, 10, 'score, 10; equal succeeded');
+	assert.equal(board.final_score.white, 8, 'score, 8; equal succeeded'); //komi = 8
+});
+
+QUnit.test('Determine winner, medium complexity board, no captures', function(assert) {
 	var board_six = board_with_placement(sixbysix_bicolor);
 	var winner = board_six.determine_winner();
-	
+	console.log(board_six.final_score);
 	assert.equal(winner, 1, 'winner, 1; equal succeeded');
 });
 

@@ -40,6 +40,7 @@ function Board(size) {
 	//Captures stones for each player. Could be a list later, for visualisation. Now only to count score.
 	this.cap_white = 0;
 	this.cap_black = 0;
+	this.final_score = {black: 0, white: 0};
 	/**
 	 * Returns komi (extra score for white) based on board size. Not sure what to set this to
 	 * for any board size, so it's all (almost) the same for now.
@@ -370,14 +371,16 @@ function Board(size) {
 	this.determine_winner = function(score) {
 		score = this.area_score();
 		var komi = this.get_komi();
-		if(score.black > score.white + komi)
+		score.black += this.cap_black;
+		score.white += this.cap_white + komi;
+		if(score.black > score.white)
 			this.winner = 1;
-		else if(score.black < score.white + komi)
+		else if(score.black < score.white)
 			this.winner = 0;
 		else
 			this.winner = -1; // Draw
 		winner_string = (this.winner == 1) ? 'Black' : 'White'; //FIXME delete later
-		console.log('Winner is ' + winner_string);
+		this.final_score = score;
 		return this.winner;
 	}
 	this.undo_last_move = function() {
