@@ -14,7 +14,15 @@ function get_gradient(x, y, current_color, tile_size, ctx) {
   gradient.addColorStop(1, color2);
   return gradient;
 }
-
+function draw_mark(mark, tile_size, offset, ctx) {
+  ctx.font = "bold 30px Arial";
+  ctx.fillStyle = 'red';
+  ctx.fillText("X", mark.x * tile_size + offset - 20, mark.y * tile_size + offset);
+  ctx.font = "bold 12px Arial";
+  ctx.fillStyle = 'red';
+  var color_string = (mark.color == 1) ? 'B' : 'W';
+  ctx.fillText(color_string, mark.x * tile_size + offset, mark.y * tile_size + offset);
+}
 function draw_stone(stone, tile_size, offset, ctx) {  
     ctx.beginPath();
 
@@ -82,7 +90,7 @@ function BoardView(tile_amount, canvas_width) {
     ctx.rect(0,0, canvas_width, canvas_width);
     ctx.fillStyle = pat;
     ctx.fill();
-  };
+  }
   this.draw_board_lines = function(ctx) {
     for(var i = 0; i < this.tile_amount; i++) {
       //Draw vertical line
@@ -110,7 +118,7 @@ function BoardView(tile_amount, canvas_width) {
     ctx.arc(midpoint, midpoint, this.tile_size*0.075, 0, 2 * Math.PI );
     ctx.fillStyle = 'black';
     ctx.fill();
-  };
+  }
   
   this.draw = function(board, ctx) {
     this.draw_background(ctx);
@@ -122,6 +130,11 @@ function BoardView(tile_amount, canvas_width) {
       for(var y = 0; y < this.tile_amount; y++)
         if(stones[x][y] != null)
           draw_stone(stones[x][y], this.tile_size, this.offset, ctx);
+  }
 
-  };
+  this.draw_markings = function(markings, ctx){
+    for(var i = 0; i < markings.length; i++) {
+      draw_mark(markings[i], this.tile_size, this.offset, ctx);
+    }
+  }
 }

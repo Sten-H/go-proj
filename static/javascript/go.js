@@ -113,6 +113,7 @@ function Board(size) {
 					length++;
 		return length;
 	}
+	
 	this.switch_current_player = function() {
 		this.current_player = (this.current_player == 1) ? 0 : 1;
 	}
@@ -120,15 +121,20 @@ function Board(size) {
 	this.tile_occupied = function(x, y) {
 		return (this.stones[x][y] != null)
 	}
+	this.double_pass = function() {
+		var length = this.history.length-1;
+		return (this.history[length] == "P" && this.history[length-1] == "P");
+	}
 	/**
-	 * Player passes his turn, game ends on two consecutive passes.
+	 * Player passes his turn. 	
 	 * @return {[type]} [description]
 	 */
 	this.player_pass = function() {
 		var last_move = this.history[this.history.length - 1]
 		this.history.push("P");
-		if (last_move == "P")
+		/*if (last_move == "P")
 			this.determine_winner();
+		*/
 		this.switch_current_player();
 	}
 

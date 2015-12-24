@@ -5,6 +5,12 @@ var board;
 var names = {client: null, opponent: null};
 var canvas_change = true; //Rudimentary render optimization. Renders on mouse move, and on board events.
 var player_color; //Clients color in the game.
+var marking_mode = false;
+var marking_list = new MarkArray();
+
+
+
+
 
 function change_search_button_text(text){
   $('#search-button').text(text);
@@ -17,6 +23,8 @@ function update() {
 
 function render() {
   board_view.draw(board, ctx); 
+  if(marking_mode)
+    board_view.draw_markings(marking_list.mark_list, ctx);
 }
 
 function tick() {
@@ -26,7 +34,28 @@ function tick() {
     render();
   canvas_change = false;
 }
-
+function activate_manual_marking_mode() {
+  marking_mode = true;
+  $('#pass-button').prop('disabled', true);
+  $('#resign-button').prop('disabled', true);
+  marking_dialog();
+}
+function deactivate_manual_marking_mode() {
+  marking_mode = true;
+  $('#pass-button').prop('disabled', false);
+  $('#resign-button').prop('disabled', false);
+}
+function mark_move(mark){
+  if(!marking_list.add(mark)){
+    dispute_mark_dialog();
+    //Confirm dialog
+  }
+  else {
+    if(mark.color == player_color)
+      send_data({mark: {x: mark.x, y: mark.y, color: mark.color}});
+  }
+  canvas_change = true;
+}
 function play_move(move) {
   //Place stone
   if(board == null) // This is to prevent a situation where one player sends a move to a person who hasn't initalized his board. Can happen.
@@ -43,6 +72,8 @@ function play_move(move) {
   }
   else if(move.pass != null) {
     board.player_pass();
+    if(board.double_pass())
+      activate_manual_marking_mode();
   }
   else if(move.resign != null) {
     board.player_resign(move.color);
@@ -58,8 +89,8 @@ function play_move(move) {
 }
 
 function init() {
-  console.log('initializing game');
-  if(board == null && board_view == null){
+  if(board == null && board_view == null) {
+    console.log('initializing game');
     var size = Number($('#size').val());
     board = new Board(size);
     board_view = new BoardView(size, canvas_width);
@@ -104,9 +135,14 @@ $(function() {  //document ready short
   });
   //Detect mouse click
   $(canvas).click(function(e) {
-    if(player_color == board.current_player && board.winner == null){
-      var mouse_pos = get_mouse_pos(canvas, e);
-      var tile_pos = board_view.get_tile_coord(mouse_pos.x, mouse_pos.y);
+    var mouse_pos = get_mouse_pos(canvas, e);
+    var tile_pos = board_view.get_tile_coord(mouse_pos.x, mouse_pos.y);
+    if(marking_mode){
+      if(board.tile_occupied(tile_pos.x, tile_pos.y))
+        mark_move(new Mark(tile_pos.x, tile_pos.y, player_color));
+    }
+    else if(player_color == board.current_player && board.winner == null){
+      
       play_move({stone: {x: tile_pos.x, y: tile_pos.y}, color: player_color});
     }
   });
@@ -130,6 +166,11 @@ $(function() {  //document ready short
       update_event_history({msg: msg, color: player_color});
     }  
   });
+  //Add functionality to marking complete button
+  $('#marking-button').hide();
+  $('#marking-button').click() {
+    //Remove stones after coordinats of marks
+  }
   //Add functionality to search button
   $('#search-button').prop('disabled', true); // Disabled until clients has acquired a peer id
   $('#search-button').click(function(){

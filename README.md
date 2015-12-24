@@ -8,6 +8,8 @@ At the moment the game can score territories at game end but it has no feature t
 ###To do
 ####Manual dead stone detection
 After both player passes, let players manually mark dead stones, if they disagree, the game is in play again until they pass again.
+####Bug with webRTC not supported by browser
+If someone presses search when webRTC is not supported by browser, no one can find a match after that.
 ####Report win to python server
 After a win have the winner report the results to the python server
 ####NAT issues

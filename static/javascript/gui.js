@@ -68,3 +68,30 @@ function illegal_move_dialog(){
     ]
   });
 }
+function dispute_mark_dialog(){
+  $('#dispute-mark-dialog').dialog({
+   autoOpen: true,
+   modal: true,
+   buttons : {
+        "Yes" : function() {
+            alert("You have confirmed!");            
+        },
+        "Cancel" : function() {
+          $(this).dialog("close");
+        }
+      }
+    });
+}
+function marking_dialog(){
+  $('#marking-dialog').dialog({
+      dialogClass: "no-close",  
+      buttons: [
+      {
+        text: "OK",
+        click: function() {
+          $( this ).dialog( "close" );
+        }
+      }
+    ]
+  });
+}

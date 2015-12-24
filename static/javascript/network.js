@@ -66,6 +66,8 @@ peer.on('connection', function(connection) {
     else if(data.msg != null) {
       update_event_history({msg: data.msg, color: data.color});
     }
+    else if(data.mark != null)
+      mark_move(new Mark(data.mark.x, data.mark.y, data.mark.color));
     else
       console.log(data);
     });

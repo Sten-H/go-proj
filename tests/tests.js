@@ -138,9 +138,19 @@ QUnit.test('Test capture', function(assert) {
 	board_advanced.place_stone(0,0);
 	assert.equal(board_advanced.cap_white, 3, 'captures.white, 3; equal succeded');
 });
-/*
-(0,0)(1,0)(2,0)(3,0)
-(0,1)(1,1)(2,1)(3,1)
-(0,2)(1,2)(2,2)(3,2)
-(0,3)(1,3)(2,3)(3,3)
-*/
+
+QUnit.test('Test double pass detection', function(assert){
+	var board = board_with_placement(simple_board_monocolor);
+	board.player_pass();
+	board.player_pass();
+	assert.ok(board.double_pass(), 'Success; Double pass is detected properly');
+});
+// TEST MARKING MODE (manual marking of dead stones)
+QUnit.test('Test basic marking', function(assert) {
+	var mark_list = new MarkArray();
+	
+	assert.ok(mark_list.add(new Mark(2, 5, 1)), 'Success; new mark was added');
+	assert.notOk(mark_list.add(new Mark(2, 5, 0)), 'Success; duplicate mark was not added');
+	assert.ok(mark_list.add(new Mark(2, 5, 1)), 'Success; Duplicate of same color is removed and ignored');
+	assert.ok(mark_list.add(new Mark(2, 5, 1)), 'Success; duplicate mark can be added because of remove');
+});
