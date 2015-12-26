@@ -85,7 +85,7 @@ function play_move(move) {
       update_capture_text(); 
     }
     else { //If move was legal
-      illegal_move_dialog();
+      create_ok_dialog('Illegal move', 'That move is illegal');
       return;
     }
   }
@@ -96,7 +96,14 @@ function play_move(move) {
   }
   else if(move.resign != null) {
     board.player_resign(move.color);
-    winner_dialog();
+    var win_str = "";
+    if (move.color == player_color){
+      win_str + names.opponent;
+    }
+    else 
+      win_str + names.client;
+    win_str += " wins by resignation.";
+    create_ok_dialog('Winner!', win_str);
   }
   if(move.color == player_color){
       send_data({move: move});
@@ -123,8 +130,17 @@ function init() {
   }
 }
 function end_game() {
+  marking_mode = false;
   board.remove_dead_marks(marking_list);
-  board.determine_winner();
+  var winner_color = board.determine_winner();
+  var score = board.final_score;
+  var score_string = '<br> Black: ' + score.black + '<br> White: ' + score.white;
+  var win_str = (winner_color == 1) ? 'Black' : 'White';
+  win_str += ' is the winner!' + score_string;
+  if(winner_color == -1)
+    create_ok_dialog('Draw', 'The game is a draw!' + score_string);
+  else
+    create_ok_dialog('Winner!', win_str);
 }
 function get_mouse_pos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
@@ -145,9 +161,8 @@ function update_marking_ready(status) {
     $('#marking-button').addClass('player-ready');
   else
     $('#marking-button').removeClass('player-ready');
-
-
 }
+
 $(function() {  //document ready short
   canvas = document.getElementById('go-canvas');
   ctx = canvas.getContext("2d");

@@ -20,6 +20,21 @@ function update_event_history(move){
   $("#event-history").animate({ scrollTop: $("#event-history")[0].scrollHeight}, 1000);
 }
 
+function create_ok_dialog(title, body){
+   $('<div></div>').dialog({
+      modal: true,
+      title: title,
+      open: function() {
+        $(this).html(body);
+      },
+      buttons: {
+        Ok: function() {
+          $( this ).dialog( "close" );
+        }
+      }
+    });  //end confirm dialog
+}
+
 function update_capture_text() {
   $('#black-captures').text(board.cap_black);
   $('#white-captures').text(board.cap_white);
@@ -40,47 +55,4 @@ function mark_active_player() {
 function set_names_on_cards() {
   $('#black-name').text((player_color == 1) ? names.client : names.opponent);
   $('#white-name').text((player_color == 0) ? names.client : names.opponent);
-}
-//Dialogs
-function winner_dialog(){
-  var winner_string = (board.get_winner() == 1) ? 'Black' : 'White';
-  $('#winner-dialog-text').text(winner_string + ' is the winner!');
-  $('#winner-dialog').dialog({
-    dialogClass: "no-close",  
-    buttons: [
-      {
-        text: "OK",
-        click: function() { $( this ).dialog( "close" ); }
-      }
-    ]
-  });
-}
-function illegal_move_dialog(){
-  $('#invalid-move-dialog').dialog({
-      dialogClass: "no-close",  
-      buttons: [
-      {
-        text: "OK",
-        click: function() {
-          $( this ).dialog( "close" );
-        }
-      }
-    ]
-  });
-}
-function dispute_mark_dialog(){
-  
-}
-function marking_dialog(){
-  $('#marking-dialog').dialog({
-      dialogClass: "no-close",  
-      buttons: [
-      {
-        text: "OK",
-        click: function() {
-          $( this ).dialog( "close" );
-        }
-      }
-    ]
-  });
 }

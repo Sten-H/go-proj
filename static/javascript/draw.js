@@ -23,7 +23,7 @@ function draw_mark(mark, tile_size, offset, ctx) {
   var color_string = (mark.color == 1) ? 'B' : 'W';
   ctx.fillText(color_string, mark.x * tile_size + offset, mark.y * tile_size + offset);
 }
-function draw_stone(stone, tile_size, offset, ctx) {  
+function draw_stone(stone, tile_size, offset, ctx) {
     ctx.beginPath();
 
     var midpoint_x = stone.x * tile_size + offset;
