@@ -1,3 +1,4 @@
+
 var peer;
 function create_peer() {
   peer = new Peer({key: 'slhk5rehnzc15rk9', 
@@ -67,7 +68,10 @@ peer.on('connection', function(connection) {
       update_event_history({msg: data.msg, color: data.color});
     }
     else if(data.mark != null)
-      mark_move(new Mark(data.mark.x, data.mark.y, data.mark.color));
+      mark_move(data.mark);
+    else if(data.complete_mark != null) {
+      update_marking_ready({opponent: data.complete_mark});
+    }
     else
       console.log(data);
     });
@@ -75,7 +79,6 @@ peer.on('connection', function(connection) {
 
 peer.on('error', function(err){
   console.log(err);
-  $('body').append("<div class='ui-state-error'> An error occured connecting to opponent. Please try again. Sorry :(</div>");
   $('body').append("<div class='ui-state-error'>" + err + "</div>");
 
   $('#search-button').prop('disabled', false);

@@ -2,12 +2,13 @@ var canvas_width = 800;
 var canvas, ctx;
 var board_view;
 var board;
-var names = {client: null, opponent: null};
 var canvas_change = true; //Rudimentary render optimization. Renders on mouse move, and on board events.
-var player_color; //Clients color in the game.
 var marking_mode = false;
 var marking_list = new MarkArray();
-
+//these things below should probably be in a Player class or something.
+var marking_ready = {client: false, opponent: false};
+var player_color; //Clients color in the game.
+var names = {client: null, opponent: null};
 
 
 
@@ -28,7 +29,7 @@ function render() {
 }
 
 function tick() {
-  window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
+  window.requestAnimationFrame(tick);
   update();
   if(canvas_change)
     render();
@@ -36,24 +37,42 @@ function tick() {
 }
 function activate_manual_marking_mode() {
   marking_mode = true;
+  marking_list.clear();
   $('#pass-button').prop('disabled', true);
   $('#resign-button').prop('disabled', true);
+  $('#marking-button').show();
   marking_dialog();
 }
 function deactivate_manual_marking_mode() {
-  marking_mode = true;
+  marking_mode = false;
   $('#pass-button').prop('disabled', false);
   $('#resign-button').prop('disabled', false);
+  $('#marking-button').hide();
 }
 function mark_move(mark){
   if(!marking_list.add(mark)){
-    dispute_mark_dialog();
-    //Confirm dialog
+    if(mark.color == player_color) { // Player is disputing
+      $('#dispute-mark-dialog').dialog({
+        autoOpen: true,
+        modal: true,
+        buttons: {
+          "Yes": function() {
+            deactivate_manual_marking_mode();
+            send_data({mark: {x: mark.x, y: mark.y, color: mark.color}});
+            $(this).dialog("close");
+          },
+          "Cancel": function() {
+            $(this).dialog("close");  // We dont send move on cancel, this complicates the function.
+          }
+        }
+      });
+    }
+    else {
+      deactivate_manual_marking_mode(); // Player received dispute, goes back to play mode.
+    }
   }
-  else {
-    if(mark.color == player_color)
-      send_data({mark: {x: mark.x, y: mark.y, color: mark.color}});
-  }
+  else if(mark.color == player_color)
+    send_data({mark: {x: mark.x, y: mark.y, color: mark.color}});
   canvas_change = true;
 }
 function play_move(move) {
@@ -92,16 +111,21 @@ function init() {
   if(board == null && board_view == null) {
     console.log('initializing game');
     var size = Number($('#size').val());
+    $('#game-container').show();
+    canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
     board = new Board(size);
     board_view = new BoardView(size, canvas_width);
-    $('#game-container').show();
+    
     $('#search-box').hide();
     
     mark_active_player();
     tick();
   }
 }
-
+function end_game() {
+  board.remove_dead_marks(marking_list);
+  board.determine_winner();
+}
 function get_mouse_pos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
   return {
@@ -109,10 +133,23 @@ function get_mouse_pos(canvas, evt) {
       y: evt.clientY - rect.top
     };
 }
+function update_marking_ready(status) {
+  if(status.client != null)
+    marking_ready.client = status.client;
+  else if(status.opponent != null)
+    marking_ready.opponent = status.opponent;
 
+  if(marking_ready.opponent && marking_ready.client)
+    end_game();
+  if(marking_ready.opponent == true)
+    $('#marking-button').addClass('player-ready');
+  else
+    $('#marking-button').removeClass('player-ready');
+
+
+}
 $(function() {  //document ready short
   canvas = document.getElementById('go-canvas');
-  canvas.width = canvas.height = canvas_width = $(window).innerHeight() * 0.9;
   ctx = canvas.getContext("2d");
 
   //Add listener to pass button
@@ -149,7 +186,7 @@ $(function() {  //document ready short
   //Detect resize
   $(window).resize(function(evt){
     if(board_view != null){
-      canvas.width = canvas.height = canvas_width = $(window).innerHeight() * 0.9 ;
+      canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
       board_view.recalculate_size(canvas_width);
     }
   });
@@ -168,9 +205,19 @@ $(function() {  //document ready short
   });
   //Add functionality to marking complete button
   $('#marking-button').hide();
-  $('#marking-button').click() {
+  $('#marking-button').click(function(){
+    if(marking_ready.client == true) {
+      update_marking_ready({client: false})
+      send_data({complete_mark: false});
+    }
+    else {
+      send_data({complete_mark: true});
+      update_marking_ready({client: true});
+    }
     //Remove stones after coordinats of marks
-  }
+  });
+    
+    
   //Add functionality to search button
   $('#search-button').prop('disabled', true); // Disabled until clients has acquired a peer id
   $('#search-button').click(function(){

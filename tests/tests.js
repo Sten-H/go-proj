@@ -151,6 +151,8 @@ QUnit.test('Test basic marking', function(assert) {
 	
 	assert.ok(mark_list.add(new Mark(2, 5, 1)), 'Success; new mark was added');
 	assert.notOk(mark_list.add(new Mark(2, 5, 0)), 'Success; duplicate mark was not added');
+	mark_list.add(new Mark(3, 5, 1));
+	mark_list.add(new Mark(4, 6, 1));
 	assert.ok(mark_list.add(new Mark(2, 5, 1)), 'Success; Duplicate of same color is removed and ignored');
 	assert.ok(mark_list.add(new Mark(2, 5, 1)), 'Success; duplicate mark can be added because of remove');
 });

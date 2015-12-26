@@ -132,9 +132,6 @@ function Board(size) {
 	this.player_pass = function() {
 		var last_move = this.history[this.history.length - 1]
 		this.history.push("P");
-		/*if (last_move == "P")
-			this.determine_winner();
-		*/
 		this.switch_current_player();
 	}
 
@@ -448,6 +445,7 @@ function Board(size) {
 		else
 			this.winner = -1; // Draw
 		winner_string = (this.winner == 1) ? 'Black' : 'White'; //FIXME delete later
+		console.log(winner_string + ' wins the game!')
 		this.final_score = score;
 		return this.winner;
 	}
@@ -486,5 +484,15 @@ function Board(size) {
 		} 
 		else
 			return false; //Tried to place on an existing stone
+	}
+	this.remove_dead_marks = function(mark_array) {
+		while(mark_array.length() > 1) {
+			mark = mark_array.pop();
+			if(mark.color == 1)
+				this.cap_white += 1;
+			else
+				this.cap_black += 1;
+			this.remove_stone(this.stone[mark.x][mark.y]);
+		}
 	}
 }

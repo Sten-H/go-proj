@@ -24,6 +24,7 @@ function MarkArray() {
 		for (var i = 0; i < this.mark_list.length; i++){
 			if (this.mark_list[i].x == mark.x && this.mark_list[i].y == mark.y) {
 				found = this.mark_list[i];
+				found_index = i;
 			}
 		}
 		if(found != null) {
@@ -40,4 +41,11 @@ function MarkArray() {
 		  return true;
 	  }
 	}
+	this.clear = function() {
+		this.mark_list = new Array();
+	}
+	this.pop = function (){
+		return this.mark_list.pop();
+	}
+	this.length = function() { return this.mark_list.length; }
 }

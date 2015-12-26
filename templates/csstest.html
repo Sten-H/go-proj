@@ -50,8 +50,8 @@
         </div>
       </div>
       <div class="column-right">
-        <div id="canvas-wrapper">
-          <canvas id="go-canvas"></canvas>
+      <div id="canvas-wrapper">
+        <canvas id="go-canvas"></canvas>
         </div>
         <div id="go-button-wrapper">
           <button id="pass-button">Pass</button>
@@ -76,7 +76,15 @@
       <script>
       canvas = document.getElementById('go-canvas');
       ctx = canvas.getContext("2d");
-      canvas.width = canvas.height = canvas_width = $(window).innerHeight() * 0.9;
+      //$('#canvas-wrapper').width($('#column-right').width());
+      //$('#canvas-wrapper').height($('#column-right').height());
+      setTimeout(function() {
+        console.log($('.column-right').width());
+      console.log($('#column-left').width());  
+      });
+      
+      canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
+      //canvas.width = canvas.height = canvas_width = $('.column-right').height();
       var board = new Board(9);
       var board_view = new BoardView(9, canvas_width);
       
