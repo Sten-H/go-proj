@@ -1,3 +1,4 @@
 myEnv/
 .idea
 *.swp
+*.pyc
