@@ -24,6 +24,8 @@ function draw_mark(mark, tile_size, offset, ctx) {
   ctx.fillText(color_string, mark.x * tile_size + offset, mark.y * tile_size + offset);
 }
 function draw_stone(stone, tile_size, offset, ctx) {
+    if(stone.color == -1)
+      return;
     ctx.beginPath();
 
     var midpoint_x = stone.x * tile_size + offset;

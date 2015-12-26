@@ -6,6 +6,8 @@ The scoring rules are according to chinese rules. I like japanese rules better, 
 At the moment the game can score territories at game end but it has no feature to classify stones as dead (in endgame, this is a tough problem in many cases).
 
 ###To do
+####Show scoring visually
+After the scoring is done, render the territory points, it's almost all there in the logic, just needs to be drawn, basically.
 ####Manual dead stone detection
 After both player passes, let players manually mark dead stones, if they disagree, the game is in play again until they pass again.
 ####Bug with webRTC not supported by browser

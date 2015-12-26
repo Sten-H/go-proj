@@ -41,7 +41,8 @@ function activate_manual_marking_mode() {
   $('#pass-button').prop('disabled', true);
   $('#resign-button').prop('disabled', true);
   $('#marking-button').show();
-  marking_dialog();
+  create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent '
+    + 'disagrees on a stone marking, play will begin again, until double pass or resign. When you are done, press complete marking.');
 }
 function deactivate_manual_marking_mode() {
   marking_mode = false;
