@@ -1,17 +1,27 @@
 <!doctype html>
 <title>Go-Game</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/main_style.css') }}">
+<link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 <div class=page>
-  <h1>Flaskr</h1>
-  <div class=metanav>
-  {% if not session.logged_in %}
-    <a href="{{ url_for('login') }}">log in</a>
-  {% else %}
-    <a href="{{ url_for('logout') }}">log out</a>
-  {% endif %}
-  </div>
+  <header>
+    <a href="{{ url_for('main_view') }}"><h1>Go</h1></a>
+    <nav>
+    {% if not session.logged_in %}
+      <a href="{{ url_for('login') }}">Log in</a>
+    {% else %}
+      <a href="{{ url_for('logout') }}">log out</a>
+    {% endif %}
+      <a href="">Profile</a>
+      <a href=" {{ url_for('go_view') }}">Play</a>
+      <a href="">Friends</a>
+      <a href="">About</a>
+    </nav>
+  </header>
   {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>
   {% endfor %}
+  <div class="content">
   {% block body %}{% endblock %}  <!-- This is used so I can extend and new content here called body -->
+  </div>
 </div>

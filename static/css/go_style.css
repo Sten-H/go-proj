@@ -1,19 +1,21 @@
-html, body {
-    height: 100%;
-}
-body {
-    margin: 0;
-    font-size: 14px;
-}
 ul li .move-info {
 	color: #c77405;
 }
 ul li .chat-name {
 	color: #1c94c4;
 }
+#chat-input-wrapper {
+	display: flex;
+	flex-direction: row nowrap;
+}
 #chat-message {
 	width: 80%; 
 	margin-left: 2%;
+}
+#chat-input-wrapper input[type=textfield] {
+	flex: 1;
+	height: 1.5em;
+	margin-top: 10px;
 }
 #event-history ul {
 	list-style: none;
@@ -83,11 +85,9 @@ ul li .chat-name {
 }
 
 .column-left {
-	height: 90%;
-	margin-top: 1%;
+	margin: 2% 30px 2% 30px;
 	margin-right: 30px;
 	margin-left: 30px;
-	
 	display: flex;
 	flex-direction: column;
   	
@@ -97,9 +97,14 @@ ul li .chat-name {
 	margin-top: 3em;
 	text-align:center ;
 }
+.content {
+	
+}
 #game-container {
-	height:100%;
+	flex: 1;
+	height: 90%; /* This is so bad. If I apply display: flex to .content, I dont need it, but it bugs the other views*/
 	display: flex;
+	flex-direction: row nowrap;
 	justify-content: center;
 }
 .column-right {
@@ -107,22 +112,22 @@ ul li .chat-name {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	/*align-items: stretch;*/
-
-	margin-top: 1%;
 }
 #canvas-wrapper {
 	flex: 1;
 	text-align: center;
+	margin: 0;
+	margin-top: 3%;
+	padding: 0;
 }
 #go-canvas {
 	border-radius: 5px;
-	box-shadow: 0 0 25px #787878;
+	box-shadow: 0 0 15px #AAA;
 }
 
 #go-button-wrapper {
 	text-align: center;
-	
+	margin-bottom: 3%;
 }
 
 button, input[type=submit] {

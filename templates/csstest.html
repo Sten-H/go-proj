@@ -1,98 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Proj</title>
-    <link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='css/go_style.css') }}">    
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">     
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-    <script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
-    <script>
-      SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    </script>
-    <script src="{{ url_for('static', filename='javascript/go.js') }}"></script>
-    <script src="{{ url_for('static', filename='javascript/draw.js') }}"></script>
-  </head>
-    <body>
-    <div id="search-box" style="display: none">
-      <p id="search-text">Welcome! Press the search button to find an opponent</p>
-      <!--
-      <img id="search-wheel" src="{{ url_for('static', filename='images/wheel.gif') }}" alt="waiting">
-      -->
-      <form id="search-form">
-        <input type="hidden" name="id" id="id" value="id-here">
-        <button id="search-button">Search</button>
-      </form>
-        
-    </div>
-    <div id="game-container">
-      <div class="column-left">
-        <div id="player-info-container">
-          <div id="player-black" class="player-info">
-            <h3><span id="black-name">{name}</span> as Black</h3>
-            <p>Captures: <span id="black-captures">0</span></p>
-          </div>
-          <div id="player-white" class="player-info">
-            <h3><span id="white-name">{name}</span> as White</h3>
-            <p>Captures: <span id="white-captures">0</span></p>
-          </div>
-        </div>
-        <div id="event-history">
-          <ul id="event-list">
-            <li>White played at 1,1</li>
-            <li>White played at 1,1</li>
-          <ul>
-        </div>
-        <div>
-          <input type="textfield" id="chat-message" style="width: 80%; margin-left: 2%;">
-          <button id="chat-send">Send</button>
-        </div>
+{% extends "main_layout.html" %}
+{% block body %}
+<link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='css/go_style.css') }}">    
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">     
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+<script>
+  SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script src="{{ url_for('static', filename='javascript/go.js') }}"></script>
+<script src="{{ url_for('static', filename='javascript/draw.js') }}"></script>
+</head>
+<body>
+<div class ="extend-content" id="search-box" style="display: none">
+  <p id="search-text">Welcome! Press the search button to find an opponent</p>
+  <!--
+  <img id="search-wheel" src="{{ url_for('static', filename='images/wheel.gif') }}" alt="waiting">
+  -->
+  <form id="search-form">
+    <input type="hidden" name="id" id="id" value="id-here">
+    <button id="search-button">Search</button>
+  </form>
+    
+</div>
+
+<div id="game-container">
+  <div class="column-left">
+    <div id="player-info-container">
+      <div id="player-black" class="player-info">
+        <h3><span id="black-name">{name}</span> as Black</h3>
+        <p>Captures: <span id="black-captures">0</span></p>
       </div>
-      <div class="column-right">
-      <div id="canvas-wrapper">
-        <canvas id="go-canvas"></canvas>
-        </div>
-        <div id="go-button-wrapper">
-          <button id="pass-button">Pass</button>
-          <button id="resign-button">Resign</button>
-          <button id="marking-button">Marking complete</button>
-        </div>
+      <div id="player-white" class="player-info">
+        <h3><span id="white-name">{name}</span> as White</h3>
+        <p>Captures: <span id="white-captures">0</span></p>
       </div>
     </div>
-    <!-- Winner dialog -->
-    <div style="display: none">
-      <div id="winner-dialog" title="Winner!">
-        <div id="winner-dialog-text"></div>
-      </div>
+    <div id="event-history">
+      <ul id="event-list">
+        <li>White played at 1,1</li>
+        <li>White played at 1,1</li>
+      </ul>
     </div>
-    <!-- Invalid move dialog -->
-    <div style="display: none">
-      <div id="invalid-move-dialog" title="Invalid move!">
-        <p>That move is illegal</p>
-      </div>
+    <div id="chat-input-wrapper">
+      <input type="textfield" id="chat-message" style="width: 80%; margin-left: 2%;">
+      <button id="chat-send">Send</button>
     </div>
-    <img id="wood" src="{{ url_for('static', filename='images/wood_texture.jpg') }}" alt="woodboard" style="display: none;">
-      <script>
-      canvas = document.getElementById('go-canvas');
-      ctx = canvas.getContext("2d");
-      //$('#canvas-wrapper').width($('#column-right').width());
-      //$('#canvas-wrapper').height($('#column-right').height());
-      setTimeout(function() {
-        console.log($('.column-right').width());
-      console.log($('#column-left').width());  
-      });
-      
-      canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
-      //canvas.width = canvas.height = canvas_width = $('.column-right').height();
-      var board = new Board(9);
-      var board_view = new BoardView(9, canvas_width);
-      
-      function tick() {
-        //window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
-        board_view.draw(board, ctx);
-      }
-      tick();
-    </script>
-  </body>
-</html>
+  </div>
+  <div class="column-right">
+  <div id="canvas-wrapper">
+    <canvas id="go-canvas"></canvas>
+    </div>
+    <div id="go-button-wrapper">
+      <button id="pass-button">Pass</button>
+      <button id="resign-button">Resign</button>
+      <button id="marking-button">Marking complete</button>
+    </div>
+  </div>
+</div>
+
+<img id="wood" src="{{ url_for('static', filename='images/wood_texture.jpg') }}" alt="woodboard" style="display: none;">
+  <script>
+  canvas = document.getElementById('go-canvas');
+  ctx = canvas.getContext("2d");
+  //$('#canvas-wrapper').width($('#column-right').width());
+  //$('#canvas-wrapper').height($('#column-right').height());
+  setTimeout(function() {
+    console.log($('.column-right').width());
+  console.log($('#column-left').width());  
+  });
+  
+  //canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
+  canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height()) * 0.8;
+    $('#canvas-wrapper').height = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
+  //canvas.width = canvas.height = canvas_width = $('.column-right').height();
+  var board = new Board(9);
+  var board_view = new BoardView(9, canvas_width);
+  
+  function tick() {
+    //window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
+    board_view.draw(board, ctx);
+  }
+  tick();
+</script>
+{% endblock %}

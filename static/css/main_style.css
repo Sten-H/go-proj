@@ -1,0 +1,134 @@
+html, body, .page, .content {
+	height: 100%;
+}
+
+html, body, .page, header, .content {
+	margin: 0;
+	padding: 0;
+}
+body p {
+	font-family: 'Open Sans', sans-serif;
+}
+.page {
+	display: flex;
+	flex-direction: column;
+}
+header, .content {
+	margin: 0;
+}
+header {
+	flex: 1;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	background: linear-gradient(to bottom, #FFF, #CCC);
+	border-bottom: 2px solid #555;
+	box-shadow: 0 2px 7px #AAA;
+	
+	letter-spacing: 2px;
+	font-family: 'Raleway', sans-serif;
+	color: #333;	
+}
+header a {
+	text-decoration: none;
+}
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Raleway', sans-serif;
+	color: #333;
+}
+header h1 {
+	padding: 0 1em 0 1em;
+	margin: 0;
+	font-size: 1.4em;
+}
+
+nav a {
+	padding: 5px 10px;
+	text-decoration: none;
+	
+	font-family: 'Raleway', sans-serif;
+	color: #333;
+}
+
+nav a:hover {
+	border-bottom: 2px solid #888;
+	color: #000;
+	font-weight: bold;
+}
+nav {
+	text-align: right;
+	width: 100%;
+	padding-right: 10%	;
+}
+.content {
+	flex: 22;
+	height: 100%;
+}
+
+.extend-content {
+	text-align: center;
+	background: linear-gradient(to bottom, #FFF, #FAFAFA);
+	margin: 5% auto 0 auto;
+	width: 100%;
+	max-width: 500px;
+
+
+	border-radius: 3px;
+	padding: .5em;
+	box-shadow: 2px 2px 7px #AAA;
+}
+
+.information-window {
+	max-width: 60% !important;
+	height: 70%;
+	overflow-y: auto;
+}
+
+.information-window h3 {
+	border-bottom: 1px solid #DDD;
+}
+.extend-content h2 {
+	width: 50%;
+	margin: 0.5em auto;
+	border-bottom: 2px solid #AAA;
+}
+
+.information-content {
+	text-align: left;
+}
+
+button, input[type=submit] {
+	border-radius: 2px;
+	border: 1px solid #cccccc;
+	background-color: #f6f6f6;
+	/*box-shadow: 2px 2px gray;*/
+	font-size: 1em;
+	color: #1c94c4;
+	margin: 20px .5em;
+	padding: 3px 7px;
+	margin: 7px 7px;
+}
+button:hover, input[type=submit]:hover {
+	border-color: #fbcb09;
+	background-color: #fdf5ce;
+	color: #c77405;
+}
+button:active, input[type=submit]:active {
+	background-color: #ffffff;
+}
+button:disabled, input[type=submit]:disabled {
+	border-color: #F7724D;
+}
+
+input:not([type=submit]):not([type=file]) {
+  padding: 4px;
+  margin: 4px 0;
+  border: solid 5px #c9c9c9;
+  /*transition: border 0.3s;*/
+}
+input:not([type=submit]):not([type=file]):focus, {
+  border: solid 5px #969696;
+  background-color: red;
+  
+}
