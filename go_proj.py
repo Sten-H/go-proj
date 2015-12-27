@@ -86,7 +86,8 @@ def login():
 
 @application.route('/logout')
 def logout():
-    return Response('Logout', mimetype='text/plain')
+    session.pop('logged_in', None)
+    return redirect(url_for('main_view'))
 
 @application.route('/search', methods=['GET', 'POST'])
 def search():
@@ -115,7 +116,7 @@ def search():
 def css_test():
     return render_template('csstest.html')
 
-@application.route('/go')
+@application.route('/play')
 def go_view():
     return render_template('game.html')
 
