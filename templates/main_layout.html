@@ -2,16 +2,20 @@
 <title>Go-Game</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/main_style.css') }}">
 <div class=page>
-  <h1>Flaskr</h1>
-  <div class=metanav>
-  {% if not session.logged_in %}
-    <a href="{{ url_for('login') }}">log in</a>
-  {% else %}
-    <a href="{{ url_for('logout') }}">log out</a>
-  {% endif %}
-  </div>
+  <header>
+    <h1>Flaskr</h1>
+    <div class=metanav>
+    {% if not session.logged_in %}
+      <a href="{{ url_for('login') }}">log in</a>
+    {% else %}
+      <a href="{{ url_for('logout') }}">log out</a>
+    {% endif %}
+    </div>
+  </header>
   {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>
   {% endfor %}
+  <div class="content">
   {% block body %}{% endblock %}  <!-- This is used so I can extend and new content here called body -->
+  </div>
 </div>

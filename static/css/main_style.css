@@ -1,0 +1,20 @@
+html, body, .page {
+	height: 100%;
+}
+
+.page {
+	display: flex;
+	flex-direction: column;
+}
+header, .content {
+	margin: 0;
+}
+header {
+	flex: 1;
+	background-color: red;
+}
+
+.content {
+	flex: 12;
+	background-color: blue;
+}
