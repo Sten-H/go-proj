@@ -1,0 +1,73 @@
+{% extends "main_layout.html" %}
+{% block body %}
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+    <script src="{{ url_for('static', filename='javascript/go.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/draw.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/gui.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/network.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/marking.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/controller.js') }}"></script>
+    <script>
+      SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+    
+    <link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='css/go_style.css') }}">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/ui-lightness/jquery-ui.css">
+
+  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+  
+  <div class="extend-content" id="search-box">
+  	<h2>Search Game</h2>  
+      <p id="search-text">Welcome! Press the search button to find an opponent</p>
+      <!--
+      <img id="search-wheel" src="{{ url_for('static', filename='images/wheel.gif') }}" alt="waiting">
+      -->
+      <form id="search-form" onsubmit="return false;">
+        <input type="hidden" name="id" id="id" value="id-here">
+        <input type="textfield" name="username" id="username" placeholder="Nickname">
+        <select name="size" id="size">
+          <option value="9">9x9</option>
+          <option value="13">13x13</option>
+        </select>
+        <button id="search-button">Search</button>
+      </form>
+  </div>
+  <div id="game-container" style="display: none;">
+      <div class="column-left">
+        <div id="player-info-container">
+          <div id="player-black" class="player-info">
+            <h3><span id="black-name">{name}</span> as Black</h3>
+            <p>Captures: <span id="black-captures">0</span></p>
+          </div>
+          <div id="player-white" class="player-info">
+            <h3><span id="white-name">{name}</span> as White</h3>
+            <p>Captures: <span id="white-captures">0</span></p>
+          </div>
+        </div>
+        <div id="event-history">
+          <ul id="event-list">
+          </ul>
+        </div>
+        <div>
+          <form onsubmit="return false;"> <!-- prevent form from sending, using form to get enter key functionality -->
+            <input type="textfield" id="chat-message" placeholder="Send a message">
+            <input type="submit" id="chat-send" value="Send">
+          </form>
+        </div>
+      </div>
+
+      <div class="column-right">
+      <div id="canvas-wrapper">
+        <canvas id="go-canvas"></canvas>
+        </div>
+        <div id="go-button-wrapper">
+          <button id="pass-button">Pass</button>
+          <button id="resign-button">Resign</button>
+          <button id="marking-button">Marking complete</button>
+        </div>
+      </div>
+    </div>
+    <img id="wood" src="{{ url_for('static', filename='images/wood_texture.jpg') }}" alt="woodboard" style="display: none;">
+{% endblock %}

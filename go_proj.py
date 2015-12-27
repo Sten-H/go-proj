@@ -44,7 +44,7 @@ def teardown_request(exception):
 
 @application.route('/')
 def main_view():
-    return render_template('main_layout.html')
+    return render_template('front_page.html')
 
 @application.route('/register', methods=['GET', 'POST'])
 def register_user():
@@ -117,7 +117,7 @@ def css_test():
 
 @application.route('/go')
 def go_view():
-    return render_template('game_view.html')
+    return render_template('game.html')
 
 @application.route('/disconnect_user', methods=['POST'])
 def disconnect_user():
