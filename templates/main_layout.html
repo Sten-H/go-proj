@@ -3,14 +3,16 @@
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/main_style.css') }}">
 <div class=page>
   <header>
-    <h1>Flaskr</h1>
-    <div class=metanav>
+    <h1>Go</h1>
+    <nav>
     {% if not session.logged_in %}
-      <a href="{{ url_for('login') }}">log in</a>
+      <a href="{{ url_for('login') }}">Log in</a>
     {% else %}
       <a href="{{ url_for('logout') }}">log out</a>
     {% endif %}
-    </div>
+      <a href="">Profile</a>
+      <a href="">Play</a>
+    </nav>
   </header>
   {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>

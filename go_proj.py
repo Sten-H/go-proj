@@ -2,7 +2,6 @@ import sqlite3
 from contextlib import closing
 from flask import Flask, json, jsonify, redirect, url_for, request, flash, session, g, Response, render_template
 from collections import namedtuple
-from models import User, db, init_db
 
 
 
