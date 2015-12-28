@@ -1,8 +1,18 @@
 <!doctype html>
 <title>Go-Game</title>
+<!-- include jquery and jquery u -->
+<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<!-- custom scrollbar plugin -->
+<script src="{{ url_for('static', filename='javascript/external_libs/jquery.nicescroll.js') }}"></script>
+<!-- jquery ui theme -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/ui-lightness/jquery-ui.css">
+<!-- Webpage wide styling -->
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/main_style.css') }}">
+<!-- google fonts -->
 <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
 <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
 <div class=page>
   <header>
     <a href="{{ url_for('main_view') }}"><h1>Go</h1></a>
@@ -12,15 +22,16 @@
     {% else %}
       <a href="{{ url_for('logout') }}">log out</a>
     {% endif %}
-      <a href="">Profile</a>
+      <a href=" {{ url_for('user_profile') }}">Profile</a>
       <a href=" {{ url_for('go_view') }}">Play</a>
       <a href="">Friends</a>
       <a href="">About</a>
     </nav>
   </header>
-  {% for message in get_flashed_messages() %}
-    <div class=flash>{{ message }}</div>
-  {% endfor %}
+    {% for message in get_flashed_messages() %}
+    <div class="flash ui-state-highlight">{{ message }}</div>
+    {% endfor %}
+    {% if error %}<p class="error ui-state-error"><strong>Error:</strong> {{ error }}{% endif %}
   <div class="content">
   {% block body %}{% endblock %}  <!-- This is used so I can extend and new content here called body -->
   </div>

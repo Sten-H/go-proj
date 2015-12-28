@@ -60,6 +60,15 @@ nav {
 	text-align: right;
 	width: 100%;
 	padding-right: 10%	;
+}	
+
+.error, .flash {
+	margin: 0 auto;
+	text-align: center;
+	width: 50%;
+	max-width: 500px;
+	margin-top: 30px;
+	color: #555;
 }
 .content {
 	flex: 22;
@@ -69,11 +78,9 @@ nav {
 .extend-content {
 	text-align: center;
 	background: linear-gradient(to bottom, #FFF, #FAFAFA);
-	margin: 5% auto 0 auto;
+	margin: 3% auto 0 auto;
 	width: 100%;
 	max-width: 500px;
-
-
 	border-radius: 3px;
 	padding: .5em;
 	box-shadow: 2px 2px 7px #AAA;
@@ -81,8 +88,8 @@ nav {
 
 .information-window {
 	max-width: 60% !important;
-	height: 70%;
 	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .information-window h3 {
@@ -97,6 +104,7 @@ nav {
 .information-content {
 	text-align: left;
 }
+
 
 button, input[type=submit] {
 	border-radius: 2px;
@@ -124,9 +132,10 @@ button:disabled, input[type=submit]:disabled {
 input:not([type=submit]):not([type=file]) {
   padding: 4px;
   margin: 4px 0;
-  border: solid 5px #c9c9c9;
+  border: solid 5px #c9c9c9;;
   /*transition: border 0.3s;*/
 }
+/* This doesn't work, specificity */
 input:not([type=submit]):not([type=file]):focus, {
   border: solid 5px #969696;
   background-color: red;

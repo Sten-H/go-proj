@@ -3,8 +3,6 @@ from contextlib import closing
 from flask import Flask, json, jsonify, redirect, url_for, request, flash, session, g, Response, render_template
 from collections import namedtuple
 
-
-
 # configuration
 DATABASE = '/tmp/go.db'
 DEBUG = True
@@ -59,34 +57,43 @@ def register_user():
         return render_template('register.html')
 
 
-@application.route('/view_users')
-def view_users():
-    cur = g.db.execute('select username from users')
-    entries = [str(row[0]) + '\n' for row in cur.fetchall()]
-    return Response(entries, mimetype='text/plain')
-
-
 @application.route('/login', methods=['GET', 'POST'])
 def login():
+    error = None
     if request.method == 'POST':
         username_client = request.form.get('username')
         password_client = request.form.get('password')
         cur = g.db.execute('select password from users where username = ?', [username_client])
-        user_pass = str(cur.fetchall()[0][0])
-        if user_pass == password_client:
-            session['logged_in'] = True
-            flash('You were logged in')
-            return redirect(url_for('main_view'))
-        else:
-            flash('Incorrect something')
-            return redirect(url_for('login'))
+        rv = cur.fetchall()
+        cur.close();
+        if rv:
+            user_pass = str(rv[0][0])
+            if user_pass == password_client:
+                session['logged_in'] = True
+                session['username'] = username_client
+                flash('You were logged in')
+                return redirect(url_for('main_view'))
+        error = 'Incorrect username or password'
+        return render_template('login.html', error=error)
     else:
         return render_template('login.html')
+
+
+@application.route('/profile')
+def user_profile():
+    wins, losses, draws = 0, 0, 0
+    return render_template('profile.html', wins=wins, losses=losses, draws=draws)
+
+@application.route('/play')
+def go_view():
+    return render_template('game.html')
 
 
 @application.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    session.pop('username', None)
+    flash('User logged out')
     return redirect(url_for('main_view'))
 
 @application.route('/search', methods=['GET', 'POST'])
@@ -112,13 +119,15 @@ def search():
     else:
         return render_template('test_conn.html')
 
+@application.route('/view_users')
+def view_users():
+    cur = g.db.execute('select username from users')
+    entries = [str(row[0]) + '\n' for row in cur.fetchall()]
+    return Response(entries, mimetype='text/plain')
+
 @application.route('/test')
 def css_test():
     return render_template('csstest.html')
-
-@application.route('/play')
-def go_view():
-    return render_template('game.html')
 
 @application.route('/disconnect_user', methods=['POST'])
 def disconnect_user():
