@@ -4,7 +4,7 @@ from flask import Flask, json, jsonify, redirect, url_for, request, flash, sessi
 from collections import namedtuple
 
 # configuration
-DATABASE = '/tmp/go.db'
+DATABASE = 'db/go.db'
 DEBUG = True
 SECRET_KEY = 'development key'
 USERNAME = 'admin'

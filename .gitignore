@@ -2,3 +2,4 @@ myEnv/
 .idea
 *.swp
 *.pyc
+db
