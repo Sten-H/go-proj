@@ -15,7 +15,7 @@ application = Flask(__name__)
 application.config.from_object(__name__)
 
 # Players searching for a game are added to this queue
-player_queue = []
+player_queue = []  # FIXME this is problematic because does not work with multiple backend processes.
 Player = namedtuple('Player', 'id size')  # This is added to the player_queue
 
 
