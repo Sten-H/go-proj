@@ -1,4 +1,3 @@
-
 var peer;
 function create_peer() {
   peer = new Peer({key: 'slhk5rehnzc15rk9', 
@@ -50,7 +49,6 @@ peer.on('connection', function(connection) {
     if(data.opponent_name != null) { // If we receive opponent name, we store it.
       if(names.opponent == null){
         names.opponent = data.opponent_name;
-        set_names_on_cards();
         send_data({opponent_name: names.client});
       }
     }
@@ -83,7 +81,7 @@ peer.on('error', function(err){
 
   $('#search-button').prop('disabled', false);
   $('#search-text').text('Welcome! Press the search button to find an opponent');
-                     // both ids are removed this way and client gets a new one. User should atleast be informed somehow what happened.
+  // both ids are removed this way and client gets a new one. User should atleast be informed somehow what happened.
 });
 
 function search_match() {

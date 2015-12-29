@@ -493,7 +493,7 @@ function Board(size) {
 				this.cap_white += 1;
 			else
 				this.cap_black += 1;
-			this.remove_stone(this.stone[mark.x][mark.y]);
+			this.remove_stone(this.stones[mark.x][mark.y]);
 		}
 	}
 }

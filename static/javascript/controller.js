@@ -1,5 +1,5 @@
 var canvas_width = 800;
-var canvas, ctx;
+var canvas;
 var board_view;
 var board;
 var canvas_change = true; //Rudimentary render optimization. Renders on mouse move, and on board events.
@@ -8,7 +8,7 @@ var marking_list = new MarkArray();
 //these things below should probably be in a Player class or something.
 var marking_ready = {client: false, opponent: false};
 var player_color; //Clients color in the game.
-var names = {client: null, opponent: null};
+var names = {client: null, opponent: null, names_set: false};
 
 
 
@@ -23,9 +23,9 @@ function update() {
 }
 
 function render() {
-  board_view.draw(board, ctx); 
+  board_view.draw(board); 
   if(marking_mode)
-    board_view.draw_markings(marking_list.mark_list, ctx);
+    board_view.draw_markings(marking_list.mark_list);
 }
 
 function tick() {
@@ -33,6 +33,8 @@ function tick() {
   update();
   if(canvas_change)
     render();
+  if(!names.names_set && names.client !== null && names.opponent != null)
+    GUI.set_names_on_cards(player_color, names)
   canvas_change = false;
 }
 function activate_manual_marking_mode() {
@@ -41,7 +43,7 @@ function activate_manual_marking_mode() {
   $('#pass-button').prop('disabled', true);
   $('#resign-button').prop('disabled', true);
   $('#marking-button').show();
-  create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent '
+  GUI.create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent '
     + 'disagrees on a stone marking, play will begin again, until double pass or resign. When you are done, press complete marking.');
 }
 function deactivate_manual_marking_mode() {
@@ -49,13 +51,18 @@ function deactivate_manual_marking_mode() {
   $('#pass-button').prop('disabled', false);
   $('#resign-button').prop('disabled', false);
   $('#marking-button').hide();
+  GUI.update_event_history({global_msg: 'A stone has been disputed. Game is back in play.'});
 }
-function mark_move(mark){
+function mark_move(mark) {
   if(!marking_list.add(mark)){
     if(mark.color == player_color) { // Player is disputing
-      $('#dispute-mark-dialog').dialog({
+      $('<div></div>').dialog({
         autoOpen: true,
         modal: true,
+        title: 'Dispute stone',
+         open: function() {
+        $(this).html('Do you really want to dispute this stone? The game will resume from latest pass');
+        },
         buttons: {
           "Yes": function() {
             deactivate_manual_marking_mode();
@@ -83,10 +90,10 @@ function play_move(move) {
   if(move.stone != null){
     var stone = move.stone
     if(board.place_stone(stone.x, stone.y)){
-      update_capture_text(); 
+      GUI.update_capture_text(board.cap_black, board.cap_white); 
     }
     else { //If move was legal
-      create_ok_dialog('Illegal move', 'That move is illegal');
+      GUI.create_ok_dialog('Illegal move', 'That move is illegal');
       return;
     }
   }
@@ -104,13 +111,13 @@ function play_move(move) {
     else 
       win_str + names.client;
     win_str += " wins by resignation.";
-    create_ok_dialog('Winner!', win_str);
+    GUI.create_ok_dialog('Winner!', win_str);
   }
   if(move.color == player_color){
       send_data({move: move});
   }
-  update_event_history(move);
-  mark_active_player();
+  GUI.update_event_history(move);
+  GUI.mark_active_player(board.current_player);
   canvas_change = true;
   $('#chat-message').focus();
 }
@@ -122,14 +129,15 @@ function init() {
     $('#game-container').show();
     canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
     board = new Board(size);
-    board_view = new BoardView(size, canvas_width);
+    board_view = new BoardView(size, canvas_width, ctx);
     
     $('#search-box').hide();
     
-    mark_active_player();
+    GUI.mark_active_player(board.current_player);
     tick();
   }
 }
+
 function end_game() {
   marking_mode = false;
   board.remove_dead_marks(marking_list);
@@ -139,9 +147,9 @@ function end_game() {
   var win_str = (winner_color == 1) ? 'Black' : 'White';
   win_str += ' is the winner!' + score_string;
   if(winner_color == -1)
-    create_ok_dialog('Draw', 'The game is a draw!' + score_string);
+    GUI.create_ok_dialog('Draw', 'The game is a draw!' + score_string);
   else
-    create_ok_dialog('Winner!', win_str);
+    GUI.create_ok_dialog('Winner!', win_str);
 }
 function get_mouse_pos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
@@ -216,7 +224,8 @@ $(function() {  //document ready short
     $('#chat-message').val('');
     if(msg != ''){
       send_data({msg: msg, color: player_color});
-      update_event_history({msg: msg, color: player_color});
+      GUI.update_event_history
+  ({msg: msg, color: player_color});
     }  
   });
   //Add functionality to marking complete button
