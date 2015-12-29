@@ -1,5 +1,5 @@
 var canvas_width = 800;
-var canvas;
+var canvas, ctx;
 var board_view;
 var board;
 var canvas_change = true; //Rudimentary render optimization. Renders on mouse move, and on board events.

@@ -50,16 +50,13 @@ def teardown_request(exception):
 # Matches players searching for game, returns opponent token if match found, otherwise add to player queue
 @application.route('/search', methods=['POST'])
 def search():
-    print 'hello?'
     id = request.form.get('id')
     size = int(request.form.get('size'))
     if len(player_queue) == 0:
         add_to_queue(Player(id, size))
         return json.dumps({'status': 'In queue'})
     else:
-        print 'im gonna search opponent'
         opponent = None
-        print "me: id " + str(id) + ", size: " + str(size)
         for player in player_queue:
             if (not player.id == id) and player.size == size:
                 opponent = player
@@ -70,6 +67,7 @@ def search():
             add_to_queue(Player(id, size))
             return json.dumps({'status': 'In queue'})
 
+
 # Ideally this should disconnect users on browser/tab close.
 # Not working, browser will not send or finish the ajax request
 @application.route('/disconnect_user', methods=['POST'])
@@ -78,10 +76,12 @@ def disconnect_user():
     player_queue.remove(id)
     return json.dumps({'status': 'OK'})
 
+
 # Views
 @application.route('/')
 def main_view():
     return render_template('front_page.html')
+
 
 @application.route('/register', methods=['GET', 'POST'])
 def register_user():
@@ -124,6 +124,7 @@ def user_profile():
     wins, losses, draws = 0, 0, 0
     return render_template('profile.html', wins=wins, losses=losses, draws=draws)
 
+
 @application.route('/play')
 def go_view():
     return render_template('game.html')
@@ -135,6 +136,7 @@ def logout():
     session.pop('username', None)
     flash('User logged out')
     return redirect(url_for('main_view'))
+
 
 # FIXME remove later. Just used to quickly test css, on a layout like the game layout
 @application.route('/test')
