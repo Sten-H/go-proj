@@ -77,6 +77,14 @@ def disconnect_user():
     return json.dumps({'status': 'OK'})
 
 
+def is_logged_in():
+    try:
+        if session['logged_in']:
+            return True
+        else:
+            return False  # Should not ever end up here.
+    except KeyError:
+        return False
 # Views
 @application.route('/')
 def main_view():
@@ -121,8 +129,21 @@ def login():
 
 @application.route('/profile')
 def user_profile():
-    wins, losses, draws = 0, 0, 0
-    return render_template('profile.html', wins=wins, losses=losses, draws=draws)
+    if is_logged_in():
+        wins, losses, draws = 0, 0, 0
+        return render_template('profile.html', username=session['username'], wins=wins, losses=losses, draws=draws)
+    else:
+        flash('You need to log in to access your profile')
+        return render_template('login.html')
+
+@application.route('/friends')
+def show_friends():
+    if is_logged_in():
+        flash('Who needs friends anyway (feature doesn\'t exist yet)')
+        return redirect(url_for('main_view'))
+    else:
+        flash('You need to log in to access your friends')
+        return render_template('login.html')
 
 
 @application.route('/play')
@@ -136,6 +157,15 @@ def logout():
     session.pop('username', None)
     flash('User logged out')
     return redirect(url_for('main_view'))
+
+
+@application.route('/user/', defaults={'path': ''})
+@application.route('/user/<path:path>')
+def show_user(path):
+    # Validate the username string
+    # Share profile template creation with /profile later
+    return render_template('profile.html', username=path, wins=0, losses=0, draws=0)
+
 
 
 # FIXME remove later. Just used to quickly test css, on a layout like the game layout
