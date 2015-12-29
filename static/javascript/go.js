@@ -29,7 +29,8 @@ function Stone(x, y, color) {
 	}
 }
 /**
- * Used for finding dead groups
+ * Used for determining dead groups of stones. Stones are usually added  iteratively
+ * to the group and can start with an empty group of stones.
  * @param {Array} stones - Group starting stones
  */
 function Group(stones) {

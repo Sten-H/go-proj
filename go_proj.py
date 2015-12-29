@@ -4,6 +4,7 @@ from flask import Flask, json, jsonify, redirect, url_for, request, flash, sessi
 from collections import namedtuple
 
 # configuration
+# FIXME move this to a config file later.
 DATABASE = 'db/go.db'
 DEBUG = True
 SECRET_KEY = 'development key'
@@ -11,15 +12,17 @@ USERNAME = 'admin'
 PASSWORD = 'default'
 
 application = Flask(__name__)
-application.config.from_object(__name__)  # FIXME Makes the app read config from this file. Not optimal.
+application.config.from_object(__name__)
 
+# Players searching for a game are added to this queue
 player_queue = []
-Player = namedtuple('Player', 'id size')
+Player = namedtuple('Player', 'id size')  # This is added to the player_queue
 
 
 # Database functions
 def connect_db():
     return sqlite3.connect(application.config['DATABASE'])
+
 
 def init_db():
     with closing(connect_db()) as db:
@@ -27,12 +30,15 @@ def init_db():
             db.cursor().executescript(f.read())
         db.commit()
 
+
 def add_to_queue(player):
     player_queue.append(player)
+
 
 @application.before_request
 def before_request():
     g.db = connect_db()
+
 
 @application.teardown_request
 def teardown_request(exception):
@@ -40,6 +46,36 @@ def teardown_request(exception):
     if db is not None:
         db.close()
 
+
+# Matches players searching for game, returns opponent token if match found, otherwise add to player queue
+@application.route('/search', methods=['POST'])
+def search():
+    id = request.form.get('id')
+    size = int(request.form.get('size'))
+    if len(player_queue) == 0:
+        add_to_queue(Player(id, size))
+        return json.dumps({'status': 'In queue'})
+    else:
+        opponent = None
+        for player in player_queue:
+            if (not player.id == id) and player.size == size:
+                opponent = player
+        if opponent:
+            player_queue.remove(opponent)
+            return jsonify(id=opponent.id)
+        else:
+            add_to_queue(Player(id, size))
+            return json.dumps({'status': 'In queue'})
+
+# Ideally this should disconnect users on browser/tab close.
+# Not working, browser will not send or finish the ajax request
+@application.route('/disconnect_user', methods=['POST'])
+def disconnect_user():
+    id = request.form.get('id')
+    player_queue.remove(id)
+    return json.dumps({'status': 'OK'})
+
+# Views
 @application.route('/')
 def main_view():
     return render_template('front_page.html')
@@ -47,6 +83,7 @@ def main_view():
 @application.route('/register', methods=['GET', 'POST'])
 def register_user():
     if(request.method == 'POST'):
+        # FIXME this should probably be a bit more secure. wtform validation?
         username = request.form.get('username')
         password = request.form.get('password')
         g.db.execute('insert into users (username, password) values (?, ?)', [username, password])
@@ -96,46 +133,10 @@ def logout():
     flash('User logged out')
     return redirect(url_for('main_view'))
 
-@application.route('/search', methods=['GET', 'POST'])
-def search():
-    if request.method == 'POST':
-        id = request.form.get('id')
-        size = int(request.form.get('size'))
-        if len(player_queue) == 0:
-            add_to_queue(Player(id, size))
-            return json.dumps({'status': 'In queue'})
-        else:
-            opponent = None
-            for player in player_queue:
-                if (not player.id == id) and player.size == size:
-                    opponent = player
-            if opponent:
-                player_queue.remove(opponent)
-                return jsonify(id=opponent.id)
-            else:
-                add_to_queue(Player(id, size))
-                return json.dumps({'status': 'OK'})
-
-    else:
-        return render_template('test_conn.html')
-
-@application.route('/view_users')
-def view_users():
-    cur = g.db.execute('select username from users')
-    entries = [str(row[0]) + '\n' for row in cur.fetchall()]
-    return Response(entries, mimetype='text/plain')
-
+# FIXME remove later. Just used to quickly test css, on a layout like the game layout
 @application.route('/test')
 def css_test():
     return render_template('csstest.html')
-
-@application.route('/disconnect_user', methods=['POST'])
-def disconnect_user():
-    id = request.form.get('id')
-    print(player_queue)
-    player_queue.remove(id)
-    print(player_queue)
-    return json.dumps({'status': 'OK'})
 
 
 if __name__ == '__main__':
