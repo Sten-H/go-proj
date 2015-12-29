@@ -1,5 +1,10 @@
 function GUI() {}
 
+GUI.update_to_play = function(next_color) {
+  var color_string = (next_color == 1) ? 'Black' : 'White';
+  $('#color-to-play').text(color_string);
+  console.log('==???');
+}
 //Logging to event history and such
 GUI.update_event_history = function (move){
   var evt_string = '<li><span>';  
@@ -45,8 +50,7 @@ GUI.update_capture_text = function(cap_black, cap_white) {
 }
 //Animation effects
 GUI.mark_active_player = function(current_player) { 
-  var curr = board.current_player;
-  if(curr == 1) {
+  if(current_player == 1) {
     $('#player-black').addClass('active-player');
     $('#player-white').removeClass('active-player');
   }

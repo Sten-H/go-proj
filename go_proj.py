@@ -2,6 +2,7 @@ import sqlite3
 from contextlib import closing
 from flask import Flask, json, jsonify, redirect, url_for, request, flash, session, g, Response, render_template
 from collections import namedtuple
+from threading import Lock
 
 # configuration
 # FIXME move this to a config file later.
@@ -14,8 +15,10 @@ PASSWORD = 'default'
 application = Flask(__name__)
 application.config.from_object(__name__)
 
+
 # Players searching for a game are added to this queue
 player_queue = []  # FIXME this is problematic because does not work with multiple backend processes.
+player_queue_lock = Lock()  # Lock for operations on queue
 Player = namedtuple('Player', 'id size')  # This is added to the player_queue
 
 
@@ -32,7 +35,8 @@ def init_db():
 
 
 def add_to_queue(player):
-    player_queue.append(player)
+    with player_queue_lock:
+        player_queue.append(player)
 
 
 @application.before_request
@@ -57,15 +61,16 @@ def search():
         return json.dumps({'status': 'In queue'})
     else:
         opponent = None
-        for player in player_queue:
-            if (not player.id == id) and player.size == size:
-                opponent = player
-        if opponent:
-            player_queue.remove(opponent)
-            return jsonify(id=opponent.id)
-        else:
-            add_to_queue(Player(id, size))
-            return json.dumps({'status': 'In queue'})
+        with player_queue_lock:
+            for player in player_queue:
+                if (not player.id == id) and player.size == size:
+                    opponent = player
+            if opponent:
+                player_queue.remove(opponent)
+                return jsonify(id=opponent.id)
+            else:
+                add_to_queue(Player(id, size))
+                return json.dumps({'status': 'In queue'})
 
 
 # Ideally this should disconnect users on browser/tab close.

@@ -1,14 +1,13 @@
 {% extends "main_layout.html" %}
 {% block body %}
     
-    <script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
-    <script src="{{ url_for('static', filename='javascript/go.js') }}"></script>
-    <script src="{{ url_for('static', filename='javascript/draw.js') }}"></script>
-    <script src="{{ url_for('static', filename='javascript/gui.js') }}"></script>
-    <script src="{{ url_for('static', filename='javascript/network.js') }}"></script>
-    <script src="{{ url_for('static', filename='javascript/marking.js') }}"></script>
-    <script src="{{ url_for('static', filename='javascript/controller.js') }}"></script>
-    <script>
+    <script type="text/javascript" src="{{ url_for('static', filename='javascript/peer.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='javascript/go.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='javascript/draw.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='javascript/gui.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='javascript/network.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='javascript/controller.js') }}"></script>
+    <script type="text/javascript">
       SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     </script>
     
@@ -45,6 +44,9 @@
             <p>Captures: <span id="white-captures">0</span></p>
           </div>
         </div>
+        <div id="to-play">
+          <h3><span id="color-to-play">Black</span> to play </h3>
+        </div>
         <div id="event-history">
           <ul id="event-list">
           </ul>
@@ -68,5 +70,8 @@
         </div>
       </div>
     </div>
+    <audio id="click-sound">
+      <source src="{{ url_for('static', filename='sound/click.mp3')}}" type="audio/mpeg">
+    </audio>
     <img id="wood" src="{{ url_for('static', filename='images/wood_texture.jpg') }}" alt="woodboard" style="display: none;">
 {% endblock %}

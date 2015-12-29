@@ -11,7 +11,7 @@ var marking_ready = {client: false, opponent: false};
 var player_color; //Clients color in the game.
 var names = {client: null, opponent: null, names_set: false};
 
-
+var click_sound = new Audio("{{ url_for('static', filename='sound/click.mp3') }}");
 
 
 function change_search_button_text(text){
@@ -91,6 +91,7 @@ function play_move(move) {
   if(move.stone != null){
     var stone = move.stone
     if(board.place_stone(stone.x, stone.y)){
+      document.getElementById('click-sound').play();
       GUI.update_capture_text(board.cap_black, board.cap_white); 
     }
     else { //If move was legal
@@ -118,6 +119,7 @@ function play_move(move) {
       connection.send({move: move});
   }
   GUI.update_event_history(move);
+  GUI.update_to_play(board.current_player);
   GUI.mark_active_player(board.current_player);
   canvas_change = true;
   $('#chat-message').focus();
@@ -215,6 +217,7 @@ $(function() {  //document ready short
     if(board_view != null){
       canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
       board_view.recalculate_size(canvas_width);
+      canvas_change = true;
     }
   });
 
