@@ -27,7 +27,7 @@ function Connection() {
   this.send = function(msg) {
     send_data(msg);
   }
-  
+
   var connect_to_player = function(id, request_connect_back){
     conn = peer.connect(id);
     conn.on('open', function(){
@@ -72,7 +72,7 @@ function Connection() {
         }
       }
       else if(data.msg != null) {
-        update_event_history({msg: data.msg, color: data.color});
+        GUI.update_event_history({msg: data.msg, color: data.color});
       }
       else if(data.mark != null)
         mark_move(data.mark);
