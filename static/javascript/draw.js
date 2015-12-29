@@ -2,7 +2,7 @@ function get_gradient(x, y, current_color, tile_size, ctx) {
   var gradient = ctx.createLinearGradient(x-tile_size/2,y-tile_size/2,x+tile_size/2,y+tile_size/2);
   var color1;
   var color2;
-  if(current_color == 1){
+  if(current_color == 1 || current_color == 3) { // 3 is black territory color, for end screen
     color1 = '#444444';
     color2 = '#171717';
   }
@@ -106,7 +106,10 @@ function BoardView(tile_amount, canvas_width, ctx) {
     this.ctx.shadowOffsetX = this.tile_size*0.04;
     this.ctx.shadowColor="#4F4F4F";
 
-    this.ctx.arc(midpoint_x, midpoint_y, this.tile_size / 2, 0, 2 * Math.PI );
+    var radius = this.tile_size / 2;
+    if(stone.color > 1)
+      radius = this.tile_size / 5;
+    this.ctx.arc(midpoint_x, midpoint_y, radius, 0, 2 * Math.PI );
     //In the end I should probably just use images for the stones, right now its a gradient, and shadow.
     this.ctx.fillStyle = get_gradient(midpoint_x, midpoint_y, stone.color, this.tile_size, this.ctx);
     this.ctx.fill(); 

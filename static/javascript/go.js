@@ -101,6 +101,12 @@ function Group(stones) {
 	}
 	this.is_dead = function() { return (this.liberties == 0); }
 }
+/**
+ * ScoreGroup object is used when identifying groups of territory. It keeps track
+ * of stones belonging to the group, and also keeps track of neighbouring stone colors.
+ * If there is only one neighbouring group color, the territory/group is owned by that colour.
+ * @param {Array} stones - an array of starting stones
+ */
 function ScoreGroup(stones) {
 	this.stones = stones;
 	this.colors_found = { black: false, white: false };
@@ -404,6 +410,26 @@ function Board(size) {
 		return score_stones;
 	}
 	/**
+	 * This function gives a color a group of score stones if it is owned by a player.
+	 * This is done so territory can be rendered on game end, a colored score stone
+	 * is territory. colors: White: 2, Black: 3, Neutral: -1. It takes a group of stones,
+	 * created by area_score and colors it after the groups are defined.
+	 * @param {ScoreGroup} group - A ScoreGroup object creatd on scoring.
+	 */
+	this.color_score_group = function(group) {
+		color = group.color();
+		if(color === -1)
+			return;
+		else {
+			for(var i = 0; i < group.length(); i++) {
+				if(color == 1)
+					group.stones[i].color = 3;
+				else
+					group.stones[i].color = 2;
+			}
+		}
+	}
+	/**
 	 * Counts both players total amount of stones separately. This is a bit slow
 	 * it could be done in other loops that are already looping through board, but it
 	 * runs once (at the end of the game).
@@ -449,14 +475,14 @@ function Board(size) {
 		return this.recursive_group_score(queue, group);
 	}
 	/**
-	 * Scores the game and sets the winner accordingly. Scoring will be done according to chinese rules of go
-	 * (area scoring instead of territory scoring).
-	 * @return {dict} returns a dict with white and black score without komi, this is only used for testing.
+	 * Scores the territory score of the game, does not score captures or komi. Scoring will be 
+	 * done according to chinese rules of go. (area scoring instead of territory scoring).
+	 * @return {dict} returns a dict with white and black area score.
 	 */
 	this.area_score = function() {
 		this.reset_visited(); // Probably best to do this, so it's clean after life check of last move.
 		var bscore = 0;
-		var wscore = 0; // + komi whatever that is
+		var wscore = 0;
 		var score_stones = this.place_score_stones();
 		var score_groups = new Array();
 		
@@ -474,6 +500,8 @@ function Board(size) {
 				bscore += score_groups[i].length();
 			else if(score_groups[i].color() == 0)
 				wscore += score_groups[i].length();
+			//Colors the territory for rendering
+			this.color_score_group(score_groups[i]);
 		}
 		//Count the placed stones, 1p each.
 		placed_stones = this.count_player_stones();

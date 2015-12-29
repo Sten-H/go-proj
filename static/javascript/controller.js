@@ -142,11 +142,13 @@ function init() {
 function end_game() {
   marking_mode = false;
   board.remove_dead_marks(marking_list);
+  GUI.update_capture_text(board.cap_back, board.cap_white);
   var winner_color = board.determine_winner();
   var score = board.final_score;
   var score_string = '<br> Black: ' + score.black + '<br> White: ' + score.white;
   var win_str = (winner_color == 1) ? 'Black' : 'White';
   win_str += ' is the winner!' + score_string;
+  canvas_change = true;
   if(winner_color == -1)
     GUI.create_ok_dialog('Draw', 'The game is a draw!' + score_string);
   else
