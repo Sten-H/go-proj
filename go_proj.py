@@ -50,13 +50,16 @@ def teardown_request(exception):
 # Matches players searching for game, returns opponent token if match found, otherwise add to player queue
 @application.route('/search', methods=['POST'])
 def search():
+    print 'hello?'
     id = request.form.get('id')
     size = int(request.form.get('size'))
     if len(player_queue) == 0:
         add_to_queue(Player(id, size))
         return json.dumps({'status': 'In queue'})
     else:
+        print 'im gonna search opponent'
         opponent = None
+        print "me: id " + str(id) + ", size: " + str(size)
         for player in player_queue:
             if (not player.id == id) and player.size == size:
                 opponent = player

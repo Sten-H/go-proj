@@ -5,6 +5,7 @@ var board;
 var canvas_change = true; //Rudimentary render optimization. Renders on mouse move, and on board events.
 var marking_mode = false;
 var marking_list = new MarkArray();
+var connection = new Connection();
 //these things below should probably be in a Player class or something.
 var marking_ready = {client: false, opponent: false};
 var player_color; //Clients color in the game.
@@ -66,7 +67,7 @@ function mark_move(mark) {
         buttons: {
           "Yes": function() {
             deactivate_manual_marking_mode();
-            send_data({mark: {x: mark.x, y: mark.y, color: mark.color}});
+            connection.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
             $(this).dialog("close");
           },
           "Cancel": function() {
@@ -80,7 +81,7 @@ function mark_move(mark) {
     }
   }
   else if(mark.color == player_color)
-    send_data({mark: {x: mark.x, y: mark.y, color: mark.color}});
+    connection.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
   canvas_change = true;
 }
 function play_move(move) {
@@ -114,7 +115,7 @@ function play_move(move) {
     GUI.create_ok_dialog('Winner!', win_str);
   }
   if(move.color == player_color){
-      send_data({move: move});
+      connection.send({move: move});
   }
   GUI.update_event_history(move);
   GUI.mark_active_player(board.current_player);
@@ -216,14 +217,14 @@ $(function() {  //document ready short
   });
 
   $(window).unload(function(){
-    send_data({disconnect: true});
+    connection.send({disconnect: true});
   });
   //Add functionality to chat button
   $('#chat-send').click(function(){
     var msg = $('#chat-message').val();
     $('#chat-message').val('');
     if(msg != ''){
-      send_data({msg: msg, color: player_color});
+      connection.send({msg: msg, color: player_color});
       GUI.update_event_history
   ({msg: msg, color: player_color});
     }  
@@ -233,10 +234,10 @@ $(function() {  //document ready short
   $('#marking-button').click(function(){
     if(marking_ready.client == true) {
       update_marking_ready({client: false})
-      send_data({complete_mark: false});
+      connection.send({complete_mark: false});
     }
     else {
-      send_data({complete_mark: true});
+      connection.send({complete_mark: true});
       update_marking_ready({client: true});
     }
     //Remove stones after coordinats of marks
@@ -247,10 +248,9 @@ $(function() {  //document ready short
   $('#search-button').prop('disabled', true); // Disabled until clients has acquired a peer id
   $('#search-button').click(function(){
       $('.ui-state-error').remove();
-      $('#id').val(my_id);
-      names.client = $('#username').val();
+      names.client = $('#username').val(); //FIXME
       $('#search-text').text('Searching for opponent...');
       $(this).prop('disabled', true);
-      search_match();
+      connection.search_match();
   }); //End of search button
 }); //End of document ready
