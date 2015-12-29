@@ -34,6 +34,22 @@ EEBWEE
 EEBWEE
 BBBWWW
  */
+var sixbysix_bicolor_dead = 'EWWEBEBBBBBEEEBWWWWEBWEBEEBWEBBBBWWW'; //score b: 22+3=25, 12+2 + komi(8) = 22
+/*
+EWWEBE
+BBBBBE
+EEBWWW
+WEBWEB
+EEBWEB
+BBBWWW
+ */
+var dead_stone_board = 'EBEWBEBBE'; // black score: 3 * 3 + 1 =  10
+/*
+EBE
+WBE
+BBE
+*/
+
 /**
  * Creates a new board and places stones according to string param, returns result.
  * @param  {String} placement - A string representing stone placements.
@@ -94,6 +110,39 @@ QUnit.test('Test score with with captures', function(assert) {
 	
 	assert.equal(board.final_score.black, 10, 'score, 10; equal succeeded');
 	assert.equal(board.final_score.white, 8, 'score, 8; equal succeeded'); //komi = 8
+});
+
+QUnit.test('Test score with with dead marked stone', function(assert) {
+	var board = board_with_placement(dead_stone_board);
+	marks = new MarkArray();
+	marks.add(new Mark(0, 1, 0));
+	board.remove_dead_marks(marks);
+	var winner = board.determine_winner();
+	
+	assert.equal(board.final_score.black, 10, 'score, 10; equal succeeded');
+	assert.equal(board.final_score.white, 8, 'score, 8; equal succeeded'); //komi = 8
+});
+/*
+EWWEBE
+BBBBBE
+EEBWWW
+WEBWEB
+EEBWEB
+BBBWWW
+ */
+QUnit.test('Test score with advanced board and multiple dead marked stones', function(assert) {
+	var board = board_with_placement(sixbysix_bicolor_dead);
+	marks = new MarkArray();
+	marks.add(new Mark(1, 0, 0));
+	marks.add(new Mark(2, 0, 1));
+	marks.add(new Mark(0, 3, 1));
+	marks.add(new Mark(5, 3, 0));
+	marks.add(new Mark(5, 4, 0));
+	board.remove_dead_marks(marks);
+	var winner = board.determine_winner();
+	
+	assert.equal(board.final_score.black, 25, 'score, 25; equal succeeded');
+	assert.equal(board.final_score.white, 22, 'score, 22; equal succeeded'); //komi = 8
 });
 
 QUnit.test('Determine winner, medium complexity board, no captures', function(assert) {

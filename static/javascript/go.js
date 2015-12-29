@@ -7,6 +7,61 @@ var ndir = dir.slice();
 ndir.push({x: 0, y: 0}); //Cross direction with middle coord.
 
 /**
+ * A class used to keep track of manually marked dead stones
+ * @param {Number} x - x-coord
+ * @param {Number} y - y-coord
+ * @param {Numberss} color - color of player that marked tile
+ */
+function Mark(x, y, color) {
+  this.x = x;
+  this.y = y;
+  this.color = color;
+}
+
+/**
+ * A wrapper around a list of all marked dead stones
+ */
+function MarkArray() {
+	this.mark_list = new Array();
+	/**
+	 * Adds a mark if it is not in the array and returns true. Otherwise false.
+	 * To note is that a mark 'being in' the array is only judged by position coordinate, not by markee color.
+	 * @param {boolean} mark - true if added, false if already in array.
+	 */
+	this.add = function(mark) {
+		var found = null;
+		var found_index = -1;
+		for (var i = 0; i < this.mark_list.length; i++){
+			if (this.mark_list[i].x == mark.x && this.mark_list[i].y == mark.y) {
+				found = this.mark_list[i];
+				found_index = i;
+			}
+		}
+		if(found != null) {
+	  		if(found.color != mark.color)
+	  			return false; // Opposing color is disputing mark
+	  		if(found.color == mark.color) {
+	  			//This is so weird, removing in an add function. Situation, white marked his own mark. Should remove it probably.
+	  			this.mark_list.splice(found_index, 1);
+	  			return true;
+	  		}
+	    }
+	  else {
+		  this.mark_list.push(mark);
+		  return true;
+	  }
+	}
+	this.clear = function() {
+		this.mark_list = new Array();
+	}
+	this.pop = function (){
+		return this.mark_list.pop();
+	}
+	this.length = function() { return this.mark_list.length; }
+}
+
+
+/**
  * @param {Number} x - x-coord
  * @param {Number} y - y-coord
  * @param {Number} color - color 1 is black color 0 is white. for scoring -1 is neutral, 2 is white score, 3 is black score.
@@ -486,10 +541,15 @@ function Board(size) {
 		else
 			return false; //Tried to place on an existing stone
 	}
+	/**
+	 * This function removes all the stones that have been marked dead by players.
+	 * @param  {MarkArray} mark_array - Uses the MarkArray object that dead stones are collected in
+	 */
 	this.remove_dead_marks = function(mark_array) {
-		while(mark_array.length() > 1) {
+		while(mark_array.length() > 0) {
 			mark = mark_array.pop();
-			if(mark.color == 1)
+			stone_color = this.stones[mark.x][mark.y].color;
+			if(stone_color == 1)
 				this.cap_white += 1;
 			else
 				this.cap_black += 1;
