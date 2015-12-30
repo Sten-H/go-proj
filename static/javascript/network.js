@@ -67,8 +67,9 @@ function Connection() {
 
       else if(data.disconnect != null) {
         if(board.winner == null) {
-          board.set_winner(player_color);
-          winner_dialog();
+          var loser = (player_color == 1) ? 0 : 1;
+          //board.set_winner(player_color);
+          play_move({resign: true, color: loser});
         }
       }
       else if(data.msg != null) {
