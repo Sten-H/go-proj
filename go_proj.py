@@ -124,7 +124,7 @@ def login():
             if user_pass == password_client:
                 session['logged_in'] = True
                 session['username'] = username_client
-                flash('You were logged in')
+                flash('You are now logged in')
                 return redirect(url_for('main_view'))
         error = 'Incorrect username or password'
         return render_template('login.html', error=error)
