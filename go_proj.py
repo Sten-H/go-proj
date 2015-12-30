@@ -1,6 +1,7 @@
 import sqlite3
 from contextlib import closing
 from flask import Flask, json, jsonify, redirect, url_for, request, flash, session, g, Response, render_template
+from werkzeug.security import generate_password_hash, check_password_hash
 from collections import namedtuple
 from threading import Lock
 
@@ -111,8 +112,8 @@ def register_user():
         if len(cur.fetchall()) > 0:
             error = 'Username is already taken.'
             return render_template('register.html', error=error)
-
-        g.db.execute('insert into users (username, password) values (?, ?)', [username, password])
+        pass_hashed = generate_password_hash(password)  # Adds salt to password
+        g.db.execute('insert into users (username, password) values (?, ?)', [username, pass_hashed])
         g.db.commit()
         flash('New user successfully registered')
         return redirect(url_for('login'))
@@ -130,8 +131,8 @@ def login():
         rv = cur.fetchall()
         cur.close();
         if rv:
-            user_pass = str(rv[0][0])
-            if user_pass == password_client:
+            pass_hashed = str(rv[0][0])
+            if check_password_hash(pass_hashed, password_client):
                 session['logged_in'] = True
                 session['username'] = username_client
                 flash('You are now logged in')
