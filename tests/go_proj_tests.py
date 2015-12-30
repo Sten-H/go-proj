@@ -46,15 +46,17 @@ class GoTestCase(unittest.TestCase):
 
     def test_register_username_taken(self):
         rv = self.register('mario', 'wario')
-        assert 'Username is occupied' in rv.data
+        assert 'New user successfully registered' in rv.data
+        rv = self.register('mario', 'wario')
+        assert 'Username is already taken.' in rv.data
 
     def test_register_username_too_long(self):
         rv = self.register("x" * 31, 'wario')  # username length limit is 30 chars
-        assert 'Invalid username. Too many characters (>30)' in rv.data
+        assert 'Username or password is too long (more than 30 characters).' in rv.data
 
     def test_register_password_too_long(self):
         rv = self.register('Megaman', 'W' * 31)  # password length limit is 30 chars
-        assert 'Invalid password. Too many characters (>30)' in rv.data
+        assert 'Username or password is too long (more than 30 characters).' in rv.data
 
     # Login tests
     def test_login_registered_user(self):
@@ -72,14 +74,10 @@ class GoTestCase(unittest.TestCase):
         assert 'You are now logged in' in rv.data
 
     def test_login_case_sensitive_password(self):
-        self.register('mario', 'wario')
-        rv = self.login('mario', 'WArio')
-        assert 'Incorrect username or password' in rv.data
-        self.register('waluigi', 'pepe')
-        rv = self.login('waluigi', 'PEPE')
-        assert 'Incorrect username or password' in rv.data
         self.register('bowser', 'FeelsGoodMan')
-        rv = self.login('waluigi', 'FeelsGoodMan')
+        rv = self.login('bowser', 'feelsgoodman')
+        assert 'Incorrect username or password' in rv.data
+        rv = self.login('bowser', 'FeelsGoodMan')
         assert 'You are now logged in' in rv.data
 
     def test_logout(self):

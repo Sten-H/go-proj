@@ -99,9 +99,19 @@ def main_view():
 @application.route('/register', methods=['GET', 'POST'])
 def register_user():
     if(request.method == 'POST'):
+        error = None
         # FIXME this should probably be a bit more secure. wtform validation?
-        username = request.form.get('username')
+        username = str(request.form.get('username')).lower()
         password = request.form.get('password')
+        if len(username) > 30 or len(password) > 30:
+            error = 'Username or password is too long (more than 30 characters).'
+            return render_template('register.html', error=error)
+
+        cur = g.db.execute('select username from users where username = ?', [username])
+        if len(cur.fetchall()) > 0:
+            error = 'Username is already taken.'
+            return render_template('register.html', error=error)
+
         g.db.execute('insert into users (username, password) values (?, ?)', [username, password])
         g.db.commit()
         flash('New user successfully registered')
@@ -114,7 +124,7 @@ def register_user():
 def login():
     error = None
     if request.method == 'POST':
-        username_client = request.form.get('username')
+        username_client = str(request.form.get('username')).lower()
         password_client = request.form.get('password')
         cur = g.db.execute('select password from users where username = ?', [username_client])
         rv = cur.fetchall()
@@ -131,12 +141,16 @@ def login():
     else:
         return render_template('login.html')
 
+@application.route('/user/', defaults={'path': ''})
+@application.route('/user/<path:path>')
+def show_user(path):
+    # Validate the username string
+    return render_template('profile.html', username=path, wins=0, losses=0, draws=0)
 
 @application.route('/profile')
 def user_profile():
     if is_logged_in():
-        wins, losses, draws = 0, 0, 0
-        return render_template('profile.html', username=session['username'], wins=wins, losses=losses, draws=draws)
+        return redirect(url_for('show_user', path=session['username']))
     else:
         flash('You need to log in to access your profile')
         return render_template('login.html')
@@ -162,16 +176,6 @@ def logout():
     session.pop('username', None)
     flash('User logged out')
     return redirect(url_for('main_view'))
-
-
-@application.route('/user/', defaults={'path': ''})
-@application.route('/user/<path:path>')
-def show_user(path):
-    # Validate the username string
-    # Share profile template creation with /profile later
-    return render_template('profile.html', username=path, wins=0, losses=0, draws=0)
-
-
 
 # FIXME remove later. Just used to quickly test css, on a layout like the game layout
 @application.route('/test')
