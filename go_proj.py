@@ -167,8 +167,12 @@ def login():
 def show_user(path):
     username = path.lower()
     cur = g.db.execute('select * from user_stats where username = ?', [username])
-    rv = cur.fetchall()[0]
-    return render_template('profile.html', wins=rv[0], losses=rv[1], draws=rv[2], username=username)
+    if len(cur.fetchall()) > 0:
+        print 'hello?'
+        rv = cur.fetchall()[0]
+        return render_template('profile.html', wins=rv[0], losses=rv[1], draws=rv[2], username=username)
+    else:
+        return render_template('front_page.html', error='No such user')
 
 @application.route('/profile')
 def user_profile():
