@@ -31,6 +31,16 @@ class GoTestCase(unittest.TestCase):
     def logout(self):
         return self.app.get('/logout', follow_redirects=True)
 
+    def record_results(self, username, wins, losses, draws):
+        return self.app.post('/record_results', data=dict(
+            wins=wins,
+            losses=losses,
+            draws=draws
+            ), follow_redirects=True)
+
+    def show_user(self, username):
+        return self.app.get('/user/%s' % username)
+
     def test_serve_content(self):
         rv = self.app.get('/')
         assert 'Welcome' in rv.data
@@ -87,6 +97,34 @@ class GoTestCase(unittest.TestCase):
         assert 'User logged out' in rv.data
         rv = self.logout()
         assert 'User logged out' in rv.data  # Doesn't care if you're not logged in
+
+    def test_record_win(self):
+        self.register('mario', 'wario')
+        self.login('mario', 'wario')
+        self.record_results('mario', 1, 0, 0)
+        rv = self.show_user('mario')
+        assert 'Wins: 1' in rv.data
+        assert 'Losses: 0' in rv.data
+        assert 'Draws: 0' in rv.data
+
+    def test_record_loss(self):
+        self.register('Peach', 'goomba')
+        self.login('Peach', 'goomba')
+        self.record_results('peach', 0, 1, 0)
+        rv = self.show_user('peach')
+        assert 'Wins: 0' in rv.data
+        assert 'Losses: 1' in rv.data
+        assert 'Draws: 0' in rv.data
+
+    def test_record_draw(self):
+        self.register('Peach', 'goomba')
+        self.login('Peach', 'goomba')
+        self.record_results('peach', 0, 0, 1)
+        rv = self.show_user('peach')
+        assert 'Wins: 0' in rv.data
+        assert 'Losses: 0' in rv.data
+        assert 'Draws: 1' in rv.data
+
 
 
 if __name__ == '__main__':

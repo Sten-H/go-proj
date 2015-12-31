@@ -91,10 +91,29 @@ def is_logged_in():
             return False  # Should not ever end up here.
     except KeyError:
         return False
+
 # Views
 @application.route('/')
 def main_view():
     return render_template('front_page.html')
+
+
+@application.route('/record_results', methods=['POST'])
+def record_results():
+    if is_logged_in():
+        username = session['username'].lower()
+        wins = request.form.get('wins')
+        losses = request.form.get('losses')
+        draws = request.form.get('draws')
+        g.db.execute('UPDATE user_stats ' +
+                     'SET wins = wins + ?, ' +
+                     'losses = losses + ?, ' +
+                     'draws = draws + ? ' +
+                     'WHERE username=?', [wins, losses, draws, username])
+        g.db.commit()
+        return 'OK'
+    else:  # Can this ever happen?
+        return render_template('login.html', error='Something went very wrong. Your win was not recorded, sorry.')
 
 
 @application.route('/register', methods=['GET', 'POST'])
@@ -114,6 +133,7 @@ def register_user():
             return render_template('register.html', error=error)
         pass_hashed = generate_password_hash(password)  # Adds salt to password
         g.db.execute('insert into users (username, password) values (?, ?)', [username, pass_hashed])
+        g.db.execute('insert into user_stats (username) values (?)', [username])  # Create stats row too?
         g.db.commit()
         flash('New user successfully registered')
         return redirect(url_for('login'))
@@ -127,7 +147,7 @@ def login():
     if request.method == 'POST':
         username_client = str(request.form.get('username')).lower()
         password_client = request.form.get('password')
-        cur = g.db.execute('select password from users where username = ?', [username_client])
+        cur = g.db.execute('SELECT password FROM users WHERE username = ?', [username_client])
         rv = cur.fetchall()
         cur.close();
         if rv:
@@ -145,8 +165,10 @@ def login():
 @application.route('/user/', defaults={'path': ''})
 @application.route('/user/<path:path>')
 def show_user(path):
-    # Validate the username string
-    return render_template('profile.html', username=path, wins=0, losses=0, draws=0)
+    username = path.lower()
+    cur = g.db.execute('select * from user_stats where username = ?', [username])
+    rv = cur.fetchall()[0]
+    return render_template('profile.html', wins=rv[0], losses=rv[1], draws=rv[2], username=username)
 
 @application.route('/profile')
 def user_profile():
@@ -168,6 +190,16 @@ def show_friends():
 
 @application.route('/play')
 def go_view():
+    if is_logged_in():
+        return render_template('game.html')
+    else:
+        flash('You need to log in before you can play')
+        return render_template('login.html')
+
+
+#FIXME remove this later, want to bypass login for less annoyance in dev.
+@application.route('/play-hax')
+def go_view_no_login():
     return render_template('game.html')
 
 
