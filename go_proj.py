@@ -128,7 +128,9 @@ def register_user():
             return render_template('register.html', error=error)
 
         cur = g.db.execute('select username from users where username = ?', [username])
-        if len(cur.fetchall()) > 0:
+        rv = cur.fetchall()
+        cur.close()
+        if len(rv) > 0:
             error = 'Username is already taken.'
             return render_template('register.html', error=error)
         pass_hashed = generate_password_hash(password)  # Adds salt to password
@@ -167,9 +169,10 @@ def login():
 def show_user(path):
     username = path.lower()
     cur = g.db.execute('select * from user_stats where username = ?', [username])
-    if len(cur.fetchall()) > 0:
-        print 'hello?'
-        rv = cur.fetchall()[0]
+    rv = cur.fetchall()
+    cur.close()
+    if len(rv) > 0:
+        rv = rv[0]
         return render_template('profile.html', wins=rv[0], losses=rv[1], draws=rv[2], username=username)
     else:
         return render_template('front_page.html', error='No such user')

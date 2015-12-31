@@ -3,8 +3,8 @@ function get_gradient(x, y, current_color, tile_size, ctx) {
   var color1;
   var color2;
   if(current_color == 1 || current_color == 3) { // 3 is black territory color, for end screen
-    color1 = '#444444';
-    color2 = '#171717';
+    color1 = '#353535';
+    color2 = '#000';
   }
   else {
     color1 = '#FFFFFF';
@@ -64,6 +64,26 @@ function BoardView(tile_amount, canvas_width, ctx) {
     this.ctx.fillStyle = pat;
     this.ctx.fill();
   }
+  this.draw_circle_points = function() {
+    if(this.tile_amount === 9){
+      this.ctx.fillStyle = 'black';
+      //midpoint mark
+      this.ctx.beginPath();
+      var midpoint = Math.floor(this.tile_amount / 2) * this.tile_size + this.offset;
+      this.ctx.arc(midpoint, midpoint, this.tile_size*0.075, 0, 2 * Math.PI );
+      this.ctx.fill();
+      //corner marks
+      for(var x = 2; x <= 6; x += 4) {
+        for(var y = 2; y <= 6; y += 4) {
+          this.ctx.beginPath();
+          var midpoint_x = x * this.tile_size + this.offset;
+          var midpoint_y = y * this.tile_size + this.offset;
+          this.ctx.arc(midpoint_x, midpoint_y, this.tile_size*0.075, 0, 2 * Math.PI );
+          this.ctx.fill();
+        }
+      }
+    }
+  }
   this.draw_board_lines = function() {
     for(var i = 0; i < this.tile_amount; i++) {
       //Draw vertical line
@@ -86,11 +106,7 @@ function BoardView(tile_amount, canvas_width, ctx) {
       this.ctx.fillText(i + 1, i * this.tile_size + this.offset * 1.15, 0 + this.offset / 2);
     }
     //Draw center circle
-    this.ctx.beginPath();
-    var midpoint = Math.floor(this.tile_amount / 2) * this.tile_size + this.offset;
-    this.ctx.arc(midpoint, midpoint, this.tile_size*0.075, 0, 2 * Math.PI );
-    this.ctx.fillStyle = 'black';
-    this.ctx.fill();
+    this.draw_circle_points();
   }
 
   this.draw_stone = function(stone) {
@@ -101,9 +117,9 @@ function BoardView(tile_amount, canvas_width, ctx) {
     var midpoint_x = stone.x * this.tile_size + this.offset;
     var midpoint_y = stone.y * this.tile_size + this.offset;
       
-    this.ctx.shadowBlur = this.tile_size*0.15;
-    this.ctx.shadowOffsetY = this.tile_size*0.04;
-    this.ctx.shadowOffsetX = this.tile_size*0.04;
+    this.ctx.shadowBlur = this.tile_size*0.125;
+    this.ctx.shadowOffsetY = this.tile_size*0.03;
+    this.ctx.shadowOffsetX = this.tile_size*0.03;
     this.ctx.shadowColor="#4F4F4F";
 
     var radius = this.tile_size / 2;
@@ -112,10 +128,12 @@ function BoardView(tile_amount, canvas_width, ctx) {
     this.ctx.arc(midpoint_x, midpoint_y, radius, 0, 2 * Math.PI );
     //In the end I should probably just use images for the stones, right now its a gradient, and shadow.
     this.ctx.fillStyle = get_gradient(midpoint_x, midpoint_y, stone.color, this.tile_size, this.ctx);
-    this.ctx.fill(); 
+    this.ctx.fill();
     this.ctx.shadowBlur=0;
     this.ctx.shadowOffsetY=0;
     this.ctx.shadowOffsetX=0;
+    
+    //inner fill
   }
 
   this.draw_mark = function(mark) {

@@ -78,11 +78,13 @@
     $('#canvas-wrapper').height = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
   //canvas.width = canvas.height = canvas_width = $('.column-right').height();
   var board = new Board(9);
-  var board_view = new BoardView(9, canvas_width);
+  var board_view = new BoardView(9, canvas_width, ctx);
   
+  board.place_stone(1,1);
+  board.place_stone(5,5);
   function tick() {
-    //window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
-    board_view.draw(board, ctx);
+    window.requestAnimationFrame(tick); //This is a bit overkill. Render on change later.
+    board_view.draw(board);
   }
   tick();
 </script>
