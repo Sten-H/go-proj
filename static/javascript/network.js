@@ -112,4 +112,34 @@ function Connection() {
       }
     }); //End of Ajax
   }
+  var report_results = function(name, win, loss, draw) {
+    var form = new FormData();
+    form.append("name", name);
+    form.append("wins", win);
+    form.append("losses", loss);
+    form.append("draws", draw);
+    $.ajax({
+      type : "POST",
+      url : SCRIPT_ROOT + "/record_results",
+      data: JSON.stringify({username: name, wins: win, losses: loss, draws: draw}),
+      contentType: 'application/json;charset=UTF-8',
+      success: function(result) {
+        console.log('I sent the results!');
+        },
+      error: function(error) {
+        console.log(error);
+      }
+    }); //End of Ajax
+  }
+  this.report_win = function(name) {
+    report_results(name, 1, 0, 0);
+  }
+
+  this.report_loss = function(name) {
+    report_results(name, 0, 1, 0);
+  }
+
+  this.report_draw = function(name) {
+    report_results(name, 0, 0, 1);
+  }
 }

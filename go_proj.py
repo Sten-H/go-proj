@@ -101,10 +101,10 @@ def main_view():
 @application.route('/record_results', methods=['POST'])
 def record_results():
     if is_logged_in():
-        username = session['username'].lower()
-        wins = request.form.get('wins')
-        losses = request.form.get('losses')
-        draws = request.form.get('draws')
+        username = request.json['username'].lower()
+        wins = request.json['wins']
+        losses = request.json['losses']
+        draws = request.json['draws']
         g.db.execute('UPDATE user_stats ' +
                      'SET wins = wins + ?, ' +
                      'losses = losses + ?, ' +
@@ -191,7 +191,7 @@ def show_friends():
 @application.route('/play')
 def go_view():
     if is_logged_in():
-        return render_template('game.html')
+        return render_template('game.html', username=session['username'])
     else:
         flash('You need to log in before you can play')
         return render_template('login.html')

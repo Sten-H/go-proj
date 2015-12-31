@@ -106,14 +106,7 @@ function play_move(move) {
   }
   else if(move.resign != null) {
     board.player_resign(move.color);
-    var win_str = "";
-    if (move.color == player_color){
-      win_str + names.opponent;
-    }
-    else 
-      win_str + names.client;
-    win_str += " wins by resignation.";
-    GUI.create_ok_dialog('Winner!', win_str);
+    end_game_on_resign();
   }
   if(move.color == player_color){
       connection.send({move: move});
@@ -141,20 +134,40 @@ function init() {
   }
 }
 
-function end_game() {
+function report_game_results() {
+  if(board.winner == -1)
+    connection.report_draw(names.client) // Each client reports his own draw
+  else if(board.winner == player_color) {  // Winner reports results, most likely to still have tab open, resign by tab close and such.
+    connection.report_win(names.client);
+    connection.report_loss(names.opponent);
+  }
+}
+
+function end_game_on_resign(resign_color) {
+  var win_str = (resign_color == player_color) ? names.client : names.opponent;
+  win_str += " wins by resignation.";
+  GUI.create_ok_dialog('Winner!', win_str);
+  report_game_results();
+}
+
+function end_game_on_pass() {
   marking_mode = false;
   board.remove_dead_marks(marking_list);
   GUI.update_capture_text(board.cap_back, board.cap_white);
+  
+  //Create a string for dialog
   var winner_color = board.determine_winner();
   var score = board.final_score;
   var score_string = '<br> Black: ' + score.black + '<br> White: ' + score.white;
   var win_str = (winner_color == 1) ? 'Black' : 'White';
   win_str += ' is the winner!' + score_string;
   canvas_change = true;
+
   if(winner_color == -1)
     GUI.create_ok_dialog('Draw', 'The game is a draw!' + score_string);
   else
     GUI.create_ok_dialog('Winner!', win_str);
+  report_game_results();
 }
 function get_mouse_pos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
@@ -170,7 +183,7 @@ function update_marking_ready(status) {
     marking_ready.opponent = status.opponent;
 
   if(marking_ready.opponent && marking_ready.client)
-    end_game();
+    end_game_on_pass();
   if(marking_ready.opponent == true)
     $('#marking-button').addClass('player-ready');
   else

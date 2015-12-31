@@ -2,6 +2,7 @@ import os
 import go_proj
 import tempfile
 import unittest
+from flask import jsonify, json
 
 
 class GoTestCase(unittest.TestCase):
@@ -32,11 +33,13 @@ class GoTestCase(unittest.TestCase):
         return self.app.get('/logout', follow_redirects=True)
 
     def record_results(self, username, wins, losses, draws):
-        return self.app.post('/record_results', data=dict(
-            wins=wins,
-            losses=losses,
-            draws=draws
-            ), follow_redirects=True)
+        return self.app.post('/record_results', data=json.dumps(dict(
+                username=username,
+                wins=wins,
+                losses=losses,
+                draws=draws)),
+                             content_type='application/json',
+                             follow_redirects=True)
 
     def show_user(self, username):
         return self.app.get('/user/%s' % username)
