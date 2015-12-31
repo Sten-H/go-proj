@@ -82,8 +82,8 @@ ul li .chat-name {
 }
 /* This class is added with jquery to indiate active player */
 .active-player {
-	border: 1px solid #88F26D;
-	box-shadow: 3px 3px 7px #88F26D;
+	border: 2px dashed #fbcb09;
+	/*box-shadow: 3px 3px 7px #fbcb09; */
 }
 .player-ready {
 	border: 2px solid #88F26D;
