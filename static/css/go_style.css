@@ -1,5 +1,13 @@
 #go-button-wrapper {
-	text-align: center;
+	display: flex;
+	flex-flow: row;
+	flex-wrap: wrap;
+	items-align: stretch;
+}
+
+#go-button-wrapper button {
+	margin-top: 0;
+	margin-bottom: 5px;
 }
 
 #to-play {
