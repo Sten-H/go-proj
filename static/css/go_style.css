@@ -1,3 +1,7 @@
+#go-button-wrapper {
+	text-align: center;
+}
+
 #to-play {
 	text-align: center;
 }
@@ -15,12 +19,12 @@ ul li .chat-name {
 #chat-input-wrapper {
 	display: flex;
 	flex-flow: row;
+	items-align: stretch;
 }
 #chat-message {
 	flex: 1;
 }
 #chat-send {
-	
 }
 #chat-input-wrapper input[type=textfield] {
 	flex: 1;
@@ -100,8 +104,9 @@ ul li .chat-name {
 .column-left {
 	flex:1;
 	margin: 2% 30px 2% 30px;
-	margin-right: 30px;
-	margin-left: 30px;
+	/*margin-right: 30px;
+	margin-left: 30px;*/
+	margin: 0;
 	display: flex;
 	flex-direction: column;
   	
@@ -137,10 +142,6 @@ ul li .chat-name {
 #go-canvas {
 	border-radius: 5px;
 	box-shadow: 0 0 15px #AAA;
-}
-
-#go-button-wrapper {
-	text-align: center;
 }
 
 button, input[type=submit] {
