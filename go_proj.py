@@ -19,7 +19,7 @@ application.config.from_object(__name__)
 
 # Players searching for a game are added to this queue
 player_queue = []  # FIXME this is problematic because does not work with multiple backend processes.
-player_queue_lock = Lock()  # Lock for operations on queue
+#  player_queue_lock = Lock()  # Lock for operations on queue
 Player = namedtuple('Player', 'id size')  # This is added to the player_queue
 
 
@@ -36,8 +36,7 @@ def init_db():
 
 
 def add_to_queue(player):
-    with player_queue_lock:
-        player_queue.append(player)
+    player_queue.append(player)
 
 
 @application.before_request
@@ -62,16 +61,15 @@ def search():
         return json.dumps({'status': 'In queue'})
     else:
         opponent = None
-        with player_queue_lock:
-            for player in player_queue:
-                if (not player.id == id) and player.size == size:
-                    opponent = player
-            if opponent:
-                player_queue.remove(opponent)
-                return jsonify(id=opponent.id)
-            else:
-                add_to_queue(Player(id, size))
-                return json.dumps({'status': 'In queue'})
+        for player in player_queue:
+            if (not player.id == id) and player.size == size:
+                opponent = player
+        if opponent:
+            player_queue.remove(opponent)
+            return jsonify(id=opponent.id)
+        else:
+            add_to_queue(Player(id, size))
+            return json.dumps({'status': 'In queue'})
 
 
 # Ideally this should disconnect users on browser/tab close.

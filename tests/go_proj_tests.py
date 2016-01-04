@@ -41,6 +41,12 @@ class GoTestCase(unittest.TestCase):
                              content_type='application/json',
                              follow_redirects=True)
 
+    def search(self):
+        self.app.get('/play')
+        return self.app.post('/search', data=(dict(id='bbb', size=9)),
+                             content_type='application/json',
+                             follow_redirects=True)
+
     def show_user(self, username):
         return self.app.get('/user/%s' % username)
 
@@ -128,7 +134,13 @@ class GoTestCase(unittest.TestCase):
         assert 'Losses: 0' in rv.data
         assert 'Draws: 1' in rv.data
 
+    def test_search(self):
+        self.register('Peach', 'goomba')
+        self.login('Peach', 'goomba')
+        self.search()
+        assert True
 
+assert True
 
 if __name__ == '__main__':
     unittest.main()
