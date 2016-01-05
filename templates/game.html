@@ -7,6 +7,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='javascript/gui.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='javascript/network.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='javascript/controller.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='javascript/sgf_format.js') }}"></script>
     <script type="text/javascript">
       SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     </script>
@@ -56,6 +57,11 @@
           <button id="pass-button">Pass</button>
           <button id="resign-button">Resign</button>
           <button id="marking-button">Marking complete</button>
+          <form id="paste-form" onsubmit="set_sgf()"action="http://eidogo.com/backend/upload.php" method="post">
+            <input type="hidden" name="type" value="paste">
+            <input type="hidden" name="sgf" id="sgf"></textarea> <!-- pre entered game tree for test -->
+            <input type="submit" value="Review">
+          </form>
         </div>
       </div>
       <div class="column-right">
