@@ -113,6 +113,19 @@ def record_results():
     else:  # Can this ever happen?
         return render_template('login.html', error='Something went very wrong. Your win was not recorded, sorry.')
 
+@application.route('/record_game', methods=['POST'])
+def record_game():
+    black = request.json['black']
+    white = request.json['white']
+    winner = request.json['winner']
+    score_str = request.json['score_string']
+    g.db.execute('insert into games (black, white, winner, score) values (?, ?, ?, ?)', [black, white, winner, score_str])
+    g.db.commit()
+    return 'OK'
+
+
+
+
 
 @application.route('/register', methods=['GET', 'POST'])
 def register_user():

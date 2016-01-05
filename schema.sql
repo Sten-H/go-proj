@@ -12,3 +12,12 @@ create table user_stats (
     username varchar(30),
     foreign key(username) references users(username)
 );
+
+drop table if exists games;
+create table games (
+	id integer primary key,
+	black varchar(30) not null,
+	white varchar(30) not null,
+	winner varchar(30),
+	score varchar(50)
+);

@@ -133,13 +133,28 @@ function init() {
     tick();
   }
 }
-
-function report_game_results() {
-  if(board.winner == -1)
-    connection.report_draw(names.client) // Each client reports his own draw
+function report_game(score_string, winner) {
+  var black_name;
+  var white_name;
+  if(player_color == 1){
+    black_name = names.client;
+    white_name = names.opponent;
+  } else {
+    black_name = names.opponent;
+    white_name = names.client;
+  }
+  connection.report_game_results(black_name, white_name, winner, score_string);
+}
+function report_game_results(score_string) {
+  if(board.winner == -1){
+    connection.report_draw(names.client) // Each client reports his own draw.
+    if(player_color == 1) //black reports the game info. Arbitrary choice.
+      report_game(score_string, 'draw');
+  }
   else if(board.winner == player_color) {  // Winner reports results, most likely to still have tab open, resign by tab close and such.
     connection.report_win(names.client);
     connection.report_loss(names.opponent);
+    report_game(score_string, names.client);
   }
 }
 
@@ -147,7 +162,7 @@ function end_game_on_resign(resign_color) {
   var win_str = (resign_color == player_color) ? names.client : names.opponent;
   win_str += " wins by resignation.";
   GUI.create_ok_dialog('Winner!', win_str);
-  report_game_results();
+  report_game_results(win_str);
 }
 
 function end_game_on_pass() {
@@ -167,7 +182,8 @@ function end_game_on_pass() {
     GUI.create_ok_dialog('Draw', 'The game is a draw!' + score_string);
   else
     GUI.create_ok_dialog('Winner!', win_str);
-  report_game_results();
+  score_string = 'Black: ' + board.final_score.black + ", White: " + board.final_score.white; // reuse for db entry
+  report_game_results(score_string);
 }
 function get_mouse_pos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();

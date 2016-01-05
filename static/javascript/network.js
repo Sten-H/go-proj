@@ -95,7 +95,6 @@ function Connection() {
   });
 
   this.search_match = function() {
-    console.log('gonna search');
     $('#id').val(my_id);
     $.ajax({
       type : "POST",
@@ -113,11 +112,6 @@ function Connection() {
     }); //End of Ajax
   }
   var report_results = function(name, win, loss, draw) {
-    var form = new FormData();
-    form.append("name", name);
-    form.append("wins", win);
-    form.append("losses", loss);
-    form.append("draws", draw);
     $.ajax({
       type : "POST",
       url : SCRIPT_ROOT + "/record_results",
@@ -141,5 +135,20 @@ function Connection() {
 
   this.report_draw = function(name) {
     report_results(name, 0, 0, 1);
+  }
+
+  this.report_game_results = function(black, white, winner, score_string) {
+    $.ajax({
+      type : "POST",
+      url : SCRIPT_ROOT + "/record_game",
+      data: JSON.stringify({black: black, white: white, winner: winner, score_string: score_string}),
+      contentType: 'application/json;charset=UTF-8',
+      success: function(result) {
+        console.log('I sent game info to server!');
+        },
+      error: function(error) {
+        console.log(error);
+      }
+    }); //End of Ajax
   }
 }

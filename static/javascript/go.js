@@ -529,7 +529,6 @@ function Board(size) {
 		else
 			this.winner = -1; // Draw
 		winner_string = (this.winner == 1) ? 'Black' : 'White'; //FIXME delete later
-		console.log(winner_string + ' wins the game!')
 		this.final_score = score;
 		return this.winner;
 	}

@@ -3,7 +3,6 @@ function GUI() {}
 GUI.update_to_play = function(next_color) {
   var color_string = (next_color == 1) ? 'Black' : 'White';
   $('#color-to-play').text(color_string);
-  console.log('==???');
 }
 //Logging to event history and such
 GUI.update_event_history = function (move){
