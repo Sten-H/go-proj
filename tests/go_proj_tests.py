@@ -43,7 +43,7 @@ class GoTestCase(unittest.TestCase):
 
     def search(self):
         self.app.get('/play')
-        return self.app.post('/search', data=(dict(id='bbb', size=9)),
+        return self.app.post('/search', data=json.dumps(dict(id='bbb', size="9")),
                              content_type='application/json',
                              follow_redirects=True)
 
@@ -134,13 +134,12 @@ class GoTestCase(unittest.TestCase):
         assert 'Losses: 0' in rv.data
         assert 'Draws: 1' in rv.data
 
+    #  Not sure how to test this properly. There is a bug search function I think, but it will still respond with 200
     def test_search(self):
         self.register('Peach', 'goomba')
         self.login('Peach', 'goomba')
-        self.search()
-        assert True
-
-assert True
+        rv = self.search()
+        assert rv.status_code == 200
 
 if __name__ == '__main__':
     unittest.main()

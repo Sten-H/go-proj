@@ -1,5 +1,5 @@
-function get_gradient(x, y, current_color, tile_size, ctx) {
-  var gradient = ctx.createLinearGradient(x-tile_size/2,y-tile_size/2,x+tile_size/2,y+tile_size/2);
+function get_gradient(x, y, current_color, radius, ctx) {
+  var gradient = ctx.createLinearGradient(x - radius, y - radius, x + radius, y + radius);
   var color1;
   var color2;
   if(current_color == 1 || current_color == 3) { // 3 is black territory color, for end screen
@@ -112,7 +112,7 @@ function BoardView(tile_amount, canvas_width, ctx) {
   this.draw_stone = function(stone) {
     if(stone.color == -1)
       return;
-    this.ctx.beginPath();
+    
 
     var midpoint_x = stone.x * this.tile_size + this.offset;
     var midpoint_y = stone.y * this.tile_size + this.offset;
@@ -122,12 +122,13 @@ function BoardView(tile_amount, canvas_width, ctx) {
     this.ctx.shadowOffsetX = this.tile_size*0.03;
     this.ctx.shadowColor="#4F4F4F";
 
-    var radius = this.tile_size / 2;
+    var radius = (this.tile_size / 2) * 0.98;
     if(stone.color > 1)
       radius = this.tile_size / 5;
+    this.ctx.beginPath();
     this.ctx.arc(midpoint_x, midpoint_y, radius, 0, 2 * Math.PI );
     //In the end I should probably just use images for the stones, right now its a gradient, and shadow.
-    this.ctx.fillStyle = get_gradient(midpoint_x, midpoint_y, stone.color, this.tile_size, this.ctx);
+    this.ctx.fillStyle = get_gradient(midpoint_x, midpoint_y, stone.color, radius, this.ctx);
     this.ctx.fill();
     this.ctx.shadowBlur=0;
     this.ctx.shadowOffsetY=0;

@@ -99,7 +99,8 @@ function Connection() {
     $.ajax({
       type : "POST",
       url : SCRIPT_ROOT + "/search",
-      data: $('#search-form').serialize(),
+      data: JSON.stringify({id: my_id, size: $('#size').val()}),
+      contentType: 'application/json;charset=UTF-8',
       success: function(result) {
         if(result['id'] != null)
           connect_to_player(result['id'], true);
