@@ -148,3 +148,39 @@ input:not([type=submit]):not([type=file]):focus, {
   background-color: red;
   
 }
+
+/* Profile specific stuff below */
+
+.match-history {
+	text-align: center;
+}
+
+.games-table {
+	align: center;
+	margin: 0 auto;
+	border: 1px solid #BBB;
+	border-radius: 4px;
+	border-spacing: 0;
+}
+
+.games-table td, .games-table th {
+	min-width: 75px;
+	margin: 0;
+	padding: 0 5px;
+}
+
+.games-table tr:nth-child(odd) {
+	background-color: #EEE;
+}
+
+.games-table tr:nth-child(even) {
+	background-color: #FAFAFA;
+}
+
+.winner-cell {
+	background: #C2FAAF;
+}
+
+.loser-cell {
+	background: #FAC2AF;
+}

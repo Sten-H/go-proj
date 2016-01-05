@@ -137,11 +137,11 @@ function Connection() {
     report_results(name, 0, 0, 1);
   }
 
-  this.report_game_results = function(black, white, winner, score_string) {
+  this.report_game_results = function(black, white, winner, size, score_string) {
     $.ajax({
       type : "POST",
       url : SCRIPT_ROOT + "/record_game",
-      data: JSON.stringify({black: black, white: white, winner: winner, score_string: score_string}),
+      data: JSON.stringify({black: black, white: white, size: size, winner: winner, score_string: score_string}),
       contentType: 'application/json;charset=UTF-8',
       success: function(result) {
         console.log('I sent game info to server!');

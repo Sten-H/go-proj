@@ -143,7 +143,8 @@ function report_game(score_string, winner) {
     black_name = names.opponent;
     white_name = names.client;
   }
-  connection.report_game_results(black_name, white_name, winner, score_string);
+  var size_str = board.size + "x" + board.size;
+  connection.report_game_results(black_name, white_name, size_str, winner, score_string);
 }
 function report_game_results(score_string) {
   if(board.winner == -1){

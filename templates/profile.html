@@ -5,5 +5,28 @@
     <p>Wins: {{ wins }}</p>
     <p>Losses: {{ losses }}</p>
     <p>Draws: {{ draws }}</p>
+    <div class=match-history>
+	    <h2>Match history</h2>
+		<table class=games-table>
+		<tr>
+			<th> Date </th>
+			<th> Black </th>
+			<th> White </th>
+			<th> Size </th>
+			<th> Score </th>
+		</tr>
+		{% for game in games %}
+			<tr> 
+				<td> {{ game.date }} </td>
+				<td> {{ game.black }} </td>
+				<td> {{ game.white }} </td>
+				<td> {{ game.size }} </td>
+				<td class={% if game.winner == session.username %}winner-cell
+				{% else %}loser-cell{% endif %}> {{ game.score }} 
+				</td>
+			</tr>
+		{% endfor %}
+	  </table>
+	</div
   </div>
 {% endblock %}

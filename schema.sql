@@ -16,8 +16,10 @@ create table user_stats (
 drop table if exists games;
 create table games (
 	id integer primary key,
+	game_date date not null,
 	black varchar(30) not null,
 	white varchar(30) not null,
-	winner varchar(30),
-	score varchar(50)
+	board_size varchar(10) not null,
+	winner varchar(30) not null,
+	score varchar(50) not null
 );

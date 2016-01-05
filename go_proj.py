@@ -115,16 +115,15 @@ def record_results():
 
 @application.route('/record_game', methods=['POST'])
 def record_game():
-    black = request.json['black']
-    white = request.json['white']
+    black, white = request.json['black'], request.json['white']
+    size = request.json['size']
     winner = request.json['winner']
     score_str = request.json['score_string']
-    g.db.execute('insert into games (black, white, winner, score) values (?, ?, ?, ?)', [black, white, winner, score_str])
+    g.db.execute(
+        'insert into games (game_date, black, white, board_size, winner, score) values (CURRENT_DATE, ?, ?, ?, ?, ?)',
+        [black, white, size, winner, score_str])  # Do I need one more ? mark
     g.db.commit()
     return 'OK'
-
-
-
 
 
 @application.route('/register', methods=['GET', 'POST'])
@@ -181,12 +180,17 @@ def show_user(path):
     username = path.lower()
     cur = g.db.execute('select * from user_stats where username = ?', [username])
     rv = cur.fetchall()
-    cur.close()
+    cur.close()  # Do I need to close if I do another selection?
     if len(rv) > 0:
         rv = rv[0]
-        return render_template('profile.html', wins=rv[0], losses=rv[1], draws=rv[2], username=username)
+        wins, losses, draws = rv[0], rv[1], rv[2]
     else:
         return render_template('front_page.html', error='No such user')
+    #FIXME this looks expensive, checking two rows for string match? Could use some id or something.
+    cur = g.db.execute('select game_date, black, white, board_size, winner, score from games where black=? or white=? order by game_date desc', [username, username])
+    games = [dict(date=row[0], black=row[1], white=row[2], winner=row[3], size=row[4], score=row[5]) for row in cur.fetchall()]
+    cur.close()
+    return render_template('profile.html', wins=wins, losses=losses, draws=draws, username=username, games=games)
 
 @application.route('/profile')
 def user_profile():
