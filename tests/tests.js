@@ -49,6 +49,13 @@ EBE
 WBE
 BBE
 */
+var board_with_ko_potential = 'EWEEWBEEBEEEEBEE';
+/*
+EWEE
+WBEE
+BEEE
+EBEE
+ */
 
 /**
  * Creates a new board and places stones according to string param, returns result.
@@ -164,6 +171,16 @@ QUnit.test('Test board setup with string', function(assert){
 QUnit.test('Test illegal to place on occupied space', function(assert){
 	var board = board_with_placement(simple_board_monocolor);
 	assert.notOk(board.place_stone(0,1), 'Success; Illegal to place on occupied tile');
+});
+
+QUnit.test('Test illegal to repeat last move (ko)', function(assert){
+	var board = board_with_placement(board_with_ko_potential);
+	board.place_stone(2,2);
+	board.place_stone(1,2);
+	board.place_stone(0,0);   // Does nothing
+	board.place_stone(2,1);	  // White capture
+	board.place_stone(1,2);	  // Black capture
+	assert.notOk(board.place_stone(2,1), 'Success; Illegal to repeat move (ko)');
 });
 
 QUnit.test('Test suicidal move not allowed', function(assert) {

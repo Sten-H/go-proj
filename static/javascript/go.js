@@ -538,6 +538,23 @@ function Board(size) {
 		var new_stone = new Stone(x, y, color);
 		this.stones[x][y] = new_stone;
 	}
+
+	/**
+	 * Ko is when a player repeats his last move, that is illegal. Can happen in capture situations.
+	 * @param  {Number}  x     x coord of new move
+	 * @param  {Number}  y     y coord of new move
+	 * @param  {Number}  color color of new stone
+	 * @return {Boolean}       returns true if move is ko
+	 */
+	this.is_ko = function(x, y) {
+		if(this.history.length >= 3){
+			var last_move = this.history[this.history.length-2];
+
+			return (last_move.x == x && last_move.y == y);
+		}
+		else
+			return false;
+	}
 	/**
 	 * Places stone on the x,y coordinates and then tries the board for possible self-harming move.
 	 * Returns false if stone is placed on occupied tile, or move is self-harming.
@@ -546,7 +563,7 @@ function Board(size) {
 	 * @return {boolean}  returns true if move was legal, else false.
 	 */
 	this.place_stone = function(x, y) {
-		if (!this.tile_occupied(x, y)) {
+		if (!this.tile_occupied(x, y) && !this.is_ko(x, y)) {
 			var new_stone = new Stone(x, y, this.current_player);
 			this.stones[x][y] = new_stone;
 			this.history.push(new_stone);
@@ -566,7 +583,7 @@ function Board(size) {
 			}
 		} 
 		else
-			return false; //Tried to place on an existing stone
+			return false; //Tried to place on an existing stone or ko
 	}
 	/**
 	 * This function removes all the stones that have been marked dead by players.

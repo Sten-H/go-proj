@@ -12,5 +12,3 @@ If someone presses search when webRTC is not supported by browser, no one can fi
 Right now backend is only run in one process because of a variable needing to be updated on all threads otherwise.
 ####Disconnect during search
 If a user disconnects while searching match this creates a dead token in the python servers list of players searching game.
-####Ko detection
-Players should not be able to repeat their last move (ko)
