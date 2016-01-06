@@ -143,6 +143,7 @@ function report_game(score_string, winner) {
     black_name = names.opponent;
     white_name = names.client;
   }
+
   var size_str = board.size + "x" + board.size;
   connection.report_game_results(black_name, white_name, size_str, winner, score_string);
 }
@@ -159,11 +160,18 @@ function report_game_results(score_string) {
   }
 }
 
+function end_game_cleanup(win_str) {
+  report_game_results(win_str);
+  $('#go-button-wrapper').hide();
+  $('#sgf').val(board.get_sgf());
+  $('#upload-form-container').show();
+}
+
 function end_game_on_resign(resign_color) {
   var win_str = (resign_color == player_color) ? names.client : names.opponent;
   win_str += " wins by resignation.";
   GUI.create_ok_dialog('Winner!', win_str);
-  report_game_results(win_str);
+  end_game_cleanup(win_str);
 }
 
 function end_game_on_pass() {
@@ -184,8 +192,9 @@ function end_game_on_pass() {
   else
     GUI.create_ok_dialog('Winner!', win_str);
   score_string = 'Black: ' + board.final_score.black + ", White: " + board.final_score.white; // reuse for db entry
-  report_game_results(score_string);
+  end_game_cleanup(score_string);
 }
+
 function get_mouse_pos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
   return {
@@ -211,6 +220,19 @@ $(function() {  //document ready short
   canvas = document.getElementById('go-canvas');
   ctx = canvas.getContext("2d");
 
+  $('#upload-form-container').hide();
+  $('#upload-button').tooltip();
+  $('#marking-button').tooltip();
+  $('#marking-button').tooltip({
+    content: function() {
+      if ($('#marking-button').hasClass('player-ready')) {
+        return names.opponent + " is ready!";
+      }
+      else {
+        return names.opponent + " is not ready";
+      }
+    }
+  });
   //Add listener to pass button
   $('#pass-button').click(function(){
     if(player_color == board.current_player && board.winner == null){

@@ -237,6 +237,10 @@ def logout():
 def css_test():
     return render_template('csstest.html')
 
+# FIXME remove later. just a test for review uploading
+@application.route('/eido')
+def eido_test():
+    return render_template('eidotest.html')
 
 if __name__ == '__main__':
     application.run()

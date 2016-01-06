@@ -143,6 +143,9 @@ function Board(size) {
 	this.cap_white = 0;
 	this.cap_black = 0;
 	this.final_score = {black: 0, white: 0};
+	this.sgf = new SGFFormat(this.size);  // Maybe use this as history later.
+	
+	this.get_sgf = function() { return this.sgf.get_sgf_string(); }
 	/**
 	 * Returns komi (extra score for white) based on board size. Not sure what to set this to
 	 * for any board size, so it's all (almost) the same for now.
@@ -194,6 +197,7 @@ function Board(size) {
 	this.player_pass = function() {
 		var last_move = this.history[this.history.length - 1]
 		this.history.push("P");
+		this.sgf.add_pass(this.current_player);
 		this.switch_current_player();
 	}
 
@@ -578,6 +582,7 @@ function Board(size) {
 				return false;
 			} else {
 				this.cleanup(dead_groups);
+				this.sgf.add_stone(x, y, this.current_player);
 				this.switch_current_player();
 				return true;
 			}
