@@ -56,13 +56,15 @@
         <div id="go-button-wrapper">
           <button id="pass-button">Pass</button>
           <button id="resign-button">Resign</button>
-          <button id="marking-button">Marking complete</button>
-          <form id="paste-form" onsubmit="set_sgf()"action="http://eidogo.com/backend/upload.php" method="post">
-            <input type="hidden" name="type" value="paste">
-            <input type="hidden" name="sgf" id="sgf"></textarea> <!-- pre entered game tree for test -->
-            <input type="submit" value="Review">
-          </form>
+          <button id="marking-button" title="?">Marking complete</button>
         </div>
+        <div id="upload-form-container">
+            <form id="paste-form" action="http://eidogo.com/backend/upload.php" method="post">
+              <input type="hidden" name="type" value="paste">
+              <input type="hidden" name="sgf" id="sgf"></textarea> <!-- pre entered game tree for test -->
+              <input type="submit" id="upload-button" value="Upload" title="Will forward you to eidogo.com to review your game">
+            </form>
+          </div>
       </div>
       <div class="column-right">
         <div id="canvas-wrapper">

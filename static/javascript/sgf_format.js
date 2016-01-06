@@ -1,11 +1,22 @@
 var coordinates = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-function set_sgf() {
-	$('#sgf').val("(;GM[1]FF[4]CA[UTF-8]SZ[19];B[gh];W[kf])");
-}
+/*
+Missing params:
+BP[name] = black player name
+WP[name]
+KM[number] = komi
+RE[B+25] = result
+*/
 
-function SGF_format(black_name, white_name, size) {
-	this.game_tree = [];
+function SGFFormat(size) {
+	this.game_info = "(;GM[1]FF[4]"; // should be in start of string when completed
+	this.game_info += "SZ" + "[" + size + "]";
+	//this.game_info += "KM" + "[" + komi + "]";
+	this.game_tree = "";
+
+	this.with_brackets = function(string) {
+		return "[" + string + "]";
+	}
 
 	this.translate_color = function(color) {
 		return (color == 1) ? 'B' : 'W';
@@ -21,6 +32,17 @@ function SGF_format(black_name, white_name, size) {
 
 	this.add_stone = function(x, y, color) {
 		var color = this.translate_color(color);
-		var string = color + get_coord_string(x,y) + ";";
+		var string = ";" + color + this.get_coord_string(x,y) + "\n";
+		this.game_tree += string;
+	}
+
+	this.add_pass = function(color) {
+		this.game_tree += ";" + this.translate_color(color) + "[]" + "\n";
+	}
+
+	this.get_sgf_string = function() {
+		var string = this.game_info + this.game_tree + ")"
+		console.log(string);
+		return string;
 	}
 }
