@@ -1,3 +1,4 @@
+"use strict";
 function Connection() {
   var peer = new Peer({key: 'slhk5rehnzc15rk9', 
                       config: {'iceServers': [
@@ -10,7 +11,7 @@ function Connection() {
   var conn = null;
   var my_id;    //A token to connect to this peer
 
-  this.get_id = function() { return my_id; }
+  this.get_id = function() { return my_id; };
 
   //Network functions
   /**
@@ -18,61 +19,59 @@ function Connection() {
    * @param  {dict} - Different keywords will have different responses. {move: move}, will play a move
    */
   var send_data = function(msg) {
-    if(conn != null)
+    if(conn !== null)
       conn.send(msg);
-  }
+  };
   /**
    * Used to acces send_data from outside sources.
    */
   this.send = function(msg) {
     send_data(msg);
-  }
+  };
 
   var connect_to_player = function(id, request_connect_back){
     conn = peer.connect(id);
     conn.on('open', function(){
-      if(request_connect_back == true){
+      if(request_connect_back === true){
         player_color = Math.round(Math.random()); // Random a color
         conn.send({id: my_id, opponent_color: player_color}); //Send info so peer can connect back
       }          
       conn.send({opponent_name: names.client}); //Send client nickname.
       init();
     });
-  }
-
+  };
   peer.on('open', function(id) {
     my_id = id;
     $('#search-button').prop('disabled', false);
     console.log('My peer ID is: ' + id);
   });
-
   //Receiving connection
   peer.on('connection', function(connection) {
   //Connection sending data
     connection.on('data', function(data){
-      if(data.id != null) {
+      if("id" in data) {
         player_color = (data.opponent_color == 1) ? 0 : 1;
         connect_to_player(data.id, false); // Connect back to peer
       }
 
-      if(data.opponent_name != null) { // If we receive opponent name, we store it.
-        if(names.opponent == null){
+      if("opponent_name" in data) { // If we receive opponent name, we store it.
+        if(names.opponent === null){
           names.opponent = data.opponent_name;
           send_data({opponent_name: names.client});
         }
       }
-      else if(data.move != null){
+      else if("move" in data){
         play_move(data.move);
       }
 
-      else if(data.disconnect != null) {
-        if(board.winner == null) {
+      else if("disconnect" in data) {
+        if(board.winner === null) {
           var loser = (player_color == 1) ? 0 : 1;
           //board.set_winner(player_color);
           play_move({resign: true, color: loser});
         }
       }
-      else if(data.msg != null) {
+      else if("msg" in data) {
         GUI.update_event_history({msg: data.msg, color: data.color});
       }
       else if(data.mark != null)
@@ -102,8 +101,8 @@ function Connection() {
       data: JSON.stringify({id: my_id, size: $('#size').val()}),
       contentType: 'application/json;charset=UTF-8',
       success: function(result) {
-        if(result['id'] != null)
-          connect_to_player(result['id'], true);
+        if(result.id != null)
+          connect_to_player(result.id, true);
         else
           console.log(result);
         },
@@ -111,7 +110,7 @@ function Connection() {
         console.log(error);
       }
     }); //End of Ajax
-  }
+  };
   var report_results = function(name, win, loss, draw) {
     $.ajax({
       type : "POST",
@@ -125,19 +124,16 @@ function Connection() {
         console.log(error);
       }
     }); //End of Ajax
-  }
+  };
   this.report_win = function(name) {
     report_results(name, 1, 0, 0);
-  }
-
+  };
   this.report_loss = function(name) {
     report_results(name, 0, 1, 0);
-  }
-
+  };
   this.report_draw = function(name) {
     report_results(name, 0, 0, 1);
-  }
-
+  };
   this.report_game_results = function(black, white, winner, size, score_string) {
     $.ajax({
       type : "POST",
@@ -151,5 +147,5 @@ function Connection() {
         console.log(error);
       }
     }); //End of Ajax
-  }
+  };
 }
