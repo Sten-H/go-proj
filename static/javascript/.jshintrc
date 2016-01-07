@@ -1,0 +1,17 @@
+{
+"browser": true,
+"devel": true,
+"globals": {
+	"$": false,
+	"jQUery": false,
+	"Peer": false,
+	"SCRIPT_ROOT": false,
+	"Connection": false,
+	"GUI": false,
+	"SGFFormat": false,
+	"MarkArray": false,
+	"Board": false,
+	"BoardView": false,
+	"Mark": false
+}
+}
