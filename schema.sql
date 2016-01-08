@@ -21,5 +21,8 @@ create table games (
 	white varchar(30) not null,
 	board_size varchar(10) not null,
 	winner varchar(30) not null,
-	score varchar(50) not null
+	score varchar(50) not null,
+	foreign key(black) references users(username)
+	foreign key(white) references users(username)
 );
+create index player_index on games(black, white);
