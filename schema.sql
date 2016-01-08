@@ -22,6 +22,7 @@ create table games (
 	board_size varchar(10) not null,
 	winner varchar(30) not null,
 	score varchar(50) not null,
+	sgf text,
 	foreign key(black) references users(username)
 	foreign key(white) references users(username)
 );

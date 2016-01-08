@@ -119,9 +119,10 @@ def record_game():
     size = request.json['size']
     winner = request.json['winner']
     score_str = request.json['score_string']
+    sgf = request.json['sgf']
     g.db.execute(
-        'insert into games (game_date, black, white, board_size, winner, score) values (CURRENT_DATE, ?, ?, ?, ?, ?)',
-        [black, white, size, winner, score_str])  # Do I need one more ? mark
+        'insert into games (game_date, black, white, board_size, winner, score, sgf) values (CURRENT_DATE, ?, ?, ?, ?, ?, ?)',
+        [black, white, size, winner, score_str, sgf])  # Do I need one more ? mark
     g.db.commit()
     return 'OK'
 
@@ -174,6 +175,14 @@ def login():
     else:
         return render_template('login.html')
 
+
+def get_player_games(username):
+    cur = g.db.execute('select * from games where black=? or white=? order by game_date desc', [username, username])
+    games = [dict(date=row[1], black=row[2], white=row[3], winner=row[4], size=row[5], score=row[6], sgf=row[7]) for row in cur.fetchall()]
+    print "sgf:" + str(games[0]['sgf'])
+    cur.close()
+    return games
+
 @application.route('/user/', defaults={'path': ''})
 @application.route('/user/<path:path>')
 def show_user(path):
@@ -186,10 +195,7 @@ def show_user(path):
         wins, losses, draws = rv[0], rv[1], rv[2]
     else:
         return render_template('front_page.html', error='No such user')
-    #FIXME this looks expensive, checking two rows for string match? Could use some id or something.
-    cur = g.db.execute('select game_date, black, white, board_size, winner, score from games where black=? or white=? order by game_date desc', [username, username])
-    games = [dict(date=row[0], black=row[1], white=row[2], winner=row[3], size=row[4], score=row[5]) for row in cur.fetchall()]
-    cur.close()
+    games = get_player_games(username)
     return render_template('profile.html', wins=wins, losses=losses, draws=draws, username=username, games=games)
 
 @application.route('/profile')

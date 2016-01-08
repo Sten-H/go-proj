@@ -134,7 +134,7 @@ function init() {
     tick();
   }
 }
-function report_game(score_string, winner) {
+function report_game(score_string, winner, sgf) {
   var black_name;
   var white_name;
   if(player_color == 1){
@@ -146,25 +146,26 @@ function report_game(score_string, winner) {
   }
 
   var size_str = board.size + "x" + board.size;
-  connection.report_game_results(black_name, white_name, size_str, winner, score_string);
+  connection.report_game_results(black_name, white_name, size_str, winner, score_string, sgf);
 }
-function report_game_results(score_string) {
+function report_game_results(score_string, sgf) {
   if(board.winner == -1){
     connection.report_draw(names.client); // Each client reports his own draw.
     if(player_color == 1) //black reports the game info. Arbitrary choice.
-      report_game(score_string, 'draw');
+      report_game(score_string, 'draw', sgf);
   }
   else if(board.winner == player_color) {  // Winner reports results, most likely to still have tab open, resign by tab close and such.
     connection.report_win(names.client);
     connection.report_loss(names.opponent);
-    report_game(score_string, names.client);
+    report_game(score_string, names.client, sgf);
   }
 }
 
 function end_game_cleanup(win_str) {
-  report_game_results(win_str);
+  var sgf = board.get_sgf();
+  report_game_results(win_str, sgf);
   $('#go-button-wrapper').hide();
-  $('#sgf').val(board.get_sgf());
+  $('#sgf').val(sgf);
   $('#upload-form-container').show();
 }
 

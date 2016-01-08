@@ -14,6 +14,7 @@
 			<th> White </th>
 			<th> Size </th>
 			<th> Score </th>
+			<th> View </th>
 		</tr>
 		{% for game in games %}
 			<tr> 
@@ -22,7 +23,14 @@
 				<td> {{ game.white }} </td>
 				<td> {{ game.size }} </td>
 				<td class={% if game.winner == session.username %}winner-cell
-				{% else %}loser-cell{% endif %}> {{ game.score }} 
+				{% else %}loser-cell{% endif %}> {{ game.score }}
+				</td>
+				<td> 
+				<form id="paste-form" action="http://eidogo.com/backend/upload.php" method="post">
+              		<input type="hidden" name="type" value="paste">
+              		<input type="hidden" name="sgf" id="sgf" value="{{ game.sgf }}"></textarea>
+              		<input type="submit" id="upload-button" value="Review" title="Will forward you to eidogo.com to review your game">
+            	</form>
 				</td>
 			</tr>
 		{% endfor %}
