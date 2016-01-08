@@ -1,7 +1,8 @@
+"use strict";
 var canvas_width = 800;
 var canvas, ctx;
-var board_view;
-var board;
+var board_view = null;
+var board = null;
 var canvas_change = true; //Rudimentary render optimization. Renders on mouse move, and on board events.
 var marking_mode = false;
 var marking_list = new MarkArray();
@@ -34,8 +35,8 @@ function tick() {
   update();
   if(canvas_change)
     render();
-  if(!names.names_set && names.client !== null && names.opponent != null)
-    GUI.set_names_on_cards(player_color, names)
+  if(!names.names_set && names.client !== null && names.opponent !== null)
+    GUI.set_names_on_cards(player_color, names);
   canvas_change = false;
 }
 function activate_manual_marking_mode() {
@@ -44,8 +45,8 @@ function activate_manual_marking_mode() {
   $('#pass-button').prop('disabled', true);
   $('#resign-button').prop('disabled', true);
   $('#marking-button').show();
-  GUI.create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent '
-    + 'disagrees on a stone marking, play will begin again, until double pass or resign. When you are done, press complete marking.');
+  GUI.create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent ' + 
+    'disagrees on a stone marking, play will begin again, until double pass or resign. When you are done, press complete marking.');
 }
 function deactivate_manual_marking_mode() {
   marking_mode = false;
@@ -86,10 +87,10 @@ function mark_move(mark) {
 }
 function play_move(move) {
   //Place stone
-  if(board == null) // This is to prevent a situation where one player sends a move to a person who hasn't initalized his board. Can happen.
+  if(board === null) // This is to prevent a situation where one player sends a move to a person who hasn't initalized his board. Can happen.
     init();
-  if(move.stone != null){
-    var stone = move.stone
+  if("stone" in move){
+    var stone = move.stone;
     if(board.place_stone(stone.x, stone.y)){
       document.getElementById('click-sound').play();
       GUI.update_capture_text(board.cap_black, board.cap_white); 
@@ -99,12 +100,12 @@ function play_move(move) {
       return;
     }
   }
-  else if(move.pass != null) {
+  else if("pass" in move) {
     board.player_pass();
     if(board.double_pass())
       activate_manual_marking_mode();
   }
-  else if(move.resign != null) {
+  else if("resign" in move) {
     board.player_resign(move.color);
     end_game_on_resign();
   }
@@ -119,7 +120,7 @@ function play_move(move) {
 }
 
 function init() {
-  if(board == null && board_view == null) {
+  if(board === null && board_view === null) {
     console.log('initializing game');
     var size = Number($('#size').val());
     $('#game-container').show();
@@ -149,7 +150,7 @@ function report_game(score_string, winner) {
 }
 function report_game_results(score_string) {
   if(board.winner == -1){
-    connection.report_draw(names.client) // Each client reports his own draw.
+    connection.report_draw(names.client); // Each client reports his own draw.
     if(player_color == 1) //black reports the game info. Arbitrary choice.
       report_game(score_string, 'draw');
   }
@@ -203,14 +204,15 @@ function get_mouse_pos(canvas, evt) {
     };
 }
 function update_marking_ready(status) {
-  if(status.client != null)
+  if("client" in status)
     marking_ready.client = status.client;
-  else if(status.opponent != null)
+  else if("opponent" in status)
     marking_ready.opponent = status.opponent;
 
   if(marking_ready.opponent && marking_ready.client)
     end_game_on_pass();
-  if(marking_ready.opponent == true)
+
+  if(marking_ready.opponent === true)
     $('#marking-button').addClass('player-ready');
   else
     $('#marking-button').removeClass('player-ready');
@@ -235,13 +237,13 @@ $(function() {  //document ready short
   });
   //Add listener to pass button
   $('#pass-button').click(function(){
-    if(player_color == board.current_player && board.winner == null){
-      play_move({pass: true, color: player_color})
+    if(player_color == board.current_player && board.winner === null){
+      play_move({pass: true, color: player_color});
     }
   });
   //Add listener to resign button
   $('#resign-button').click(function(){
-    if( board.winner == null) {
+    if( board.winner === null) {
       play_move({resign: true, color: player_color});
     }
   });
@@ -259,14 +261,14 @@ $(function() {  //document ready short
       if(board.tile_occupied(tile_pos.x, tile_pos.y))
         mark_move(new Mark(tile_pos.x, tile_pos.y, player_color));
     }
-    else if(player_color == board.current_player && board.winner == null){
+    else if(player_color == board.current_player && board.winner === null){
       
       play_move({stone: {x: tile_pos.x, y: tile_pos.y}, color: player_color});
     }
   });
   //Detect resize
   $(window).resize(function(evt){
-    if(board_view != null){
+    if(board_view !== null){
       canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
       board_view.recalculate_size(canvas_width);
       canvas_change = true;
@@ -280,7 +282,7 @@ $(function() {  //document ready short
   $('#chat-send').click(function(){
     var msg = $('#chat-message').val();
     $('#chat-message').val('');
-    if(msg != ''){
+    if(msg !== ''){
       connection.send({msg: msg, color: player_color});
       GUI.update_event_history
   ({msg: msg, color: player_color});
@@ -289,8 +291,8 @@ $(function() {  //document ready short
   //Add functionality to marking complete button
   $('#marking-button').hide();
   $('#marking-button').click(function(){
-    if(marking_ready.client == true) {
-      update_marking_ready({client: false})
+    if(marking_ready.client === true) {
+      update_marking_ready({client: false});
       connection.send({complete_mark: false});
     }
     else {
