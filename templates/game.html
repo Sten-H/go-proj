@@ -12,14 +12,11 @@
       SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     </script>
     
-    <link rel="stylesheet" type="text/css" href=" {{ url_for('static', filename='css/go_style.css') }}">
+    <link rel="stylesheet" type="text/css" property='stylesheet' href=" {{ url_for('static', filename='css/go_style.css') }}">
   
   <div class="extend-content" id="search-box">
   	<h2>Search Game</h2>  
       <p id="search-text">Welcome! Press the search button to find an opponent</p>
-      <!--
-      <img id="search-wheel" src="{{ url_for('static', filename='images/wheel.gif') }}" alt="waiting">
-      -->
       <form id="search-form" onsubmit="return false;">
         <input type="hidden" name="id" id="id" value="id-here">
         <input type="hidden" name="username" id="username" value="{{ username }}">
@@ -50,7 +47,7 @@
           </ul>
         </div>
         <div id="chat-input-wrapper">
-          <input type="textfield" id="chat-message" style="width: 80%; margin-left: 2%;">
+          <input type="text" id="chat-message">
           <button id="chat-send">Send</button>
         </div>
         <div id="go-button-wrapper">
@@ -61,7 +58,7 @@
         <div id="upload-form-container">
             <form id="paste-form" action="http://eidogo.com/backend/upload.php" method="post">
               <input type="hidden" name="type" value="paste">
-              <input type="hidden" name="sgf" id="sgf"></textarea> 
+              <input type="hidden" name="sgf" id="sgf">
               <input type="submit" id="upload-button" value="Review" title="Will forward you to eidogo.com to review your game">
             </form>
           </div>

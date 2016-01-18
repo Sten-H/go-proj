@@ -1,14 +1,21 @@
 "use strict";
+
+//SGF format uses chars to describe grid position aa = grid point 1,1
 var coordinates = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 /*
-Missing params:
+FIXME Missing params that can be added for completeness:
 BP[name] = black player name
 WP[name]
 KM[number] = komi
 RE[B+25] = result
 */
 
+/**
+ * This class records game moves and translates it to smart game format data. The class
+ * can be called upon to give a fully functional .sgf string that contains a full game.
+ * @param {Number} size - Size of board to be documented
+ */
 function SGFFormat(size) {
 	this.game_info = "(;GM[1]FF[4]"; // should be in start of string when completed
 	this.game_info += "SZ" + "[" + size + "]";

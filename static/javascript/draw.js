@@ -1,4 +1,7 @@
 "use strict";
+
+//Returns a gradient on the current pixel coordinates, color depends on
+//the stone to be drawn.
 function get_gradient(x, y, current_color, radius, ctx) {
   var gradient = ctx.createLinearGradient(x - radius, y - radius, x + radius, y + radius);
   var color1;
@@ -16,6 +19,13 @@ function get_gradient(x, y, current_color, radius, ctx) {
   return gradient;
 }
 
+/**
+ * BoardView object can draw a Board object to a HTML canvas
+ * to visualize the game state. The canvas is square
+ * @param {Number} tile_amount  - This is board size
+ * @param {Number} canvas_width - Pixel width of canvas (canvas is square)
+ * @param {2DContext} ctx       - Canvas context
+ */
 function BoardView(tile_amount, canvas_width, ctx) {
     this.mouse_marker = {}; //This is stored in board position, not pixel coordinates.
     this.tile_amount = tile_amount;
@@ -23,10 +33,21 @@ function BoardView(tile_amount, canvas_width, ctx) {
     this.offset = this.tile_size / 2; // The board is not at 0, 0 coordinates in canvas    
     this.ctx = ctx;
   
+  /**
+   * Recalculates size if window is resized
+   * @param  {Number} canvas_width - New pixel width
+   */
   this.recalculate_size = function(canvas_width) {
     this.tile_size = canvas_width / this.tile_amount;
     this.offset = this.tile_size / 2;
   };
+  /**
+   * Translates pixel coordinate to grid coordinate. For example
+   * 300, 300 pixel coordinate might be 5,5 grid coordinate
+   * @param  {Number} coord_x - Pixel coordinate
+   * @param  {Number} coord_y - Pixel coordinate
+   * @return {Dict} Returns a dict with x, y grid coordinates
+   */
   this.get_tile_coord = function(coord_x, coord_y) {
     var tile_coord = {x: Math.floor(coord_x / this.tile_size),
                       y: Math.floor(coord_y / this.tile_size)};
@@ -45,6 +66,12 @@ function BoardView(tile_amount, canvas_width, ctx) {
       this.mouse_marker = {};
     }
   };
+
+  /**
+   * Draws a marker that snaps to grid underneath the user's
+   * mouse position. Color depends on active player.
+   * @param  {[type]} current_player - Current player color
+   */
   this.draw_mouse_marker = function(current_player) {
     if(this.mouse_marker === null) {
       return;
@@ -57,6 +84,7 @@ function BoardView(tile_amount, canvas_width, ctx) {
       this.ctx.fillRect(marker_coord.x - rect_size / 2, marker_coord.y - rect_size / 2, rect_size, rect_size);
     }
   };
+
   this.draw_background = function() {
     //Draw background image (wood texture)
     var img = document.getElementById('wood');
@@ -65,6 +93,10 @@ function BoardView(tile_amount, canvas_width, ctx) {
     this.ctx.fillStyle = pat;
     this.ctx.fill();
   };
+
+  /**
+   * Draws the star points on the grid.
+   */
   this.draw_circle_points = function() {
     if(this.tile_amount === 9){
       this.ctx.fillStyle = 'black';
@@ -85,6 +117,7 @@ function BoardView(tile_amount, canvas_width, ctx) {
       }
     }
   };
+
   this.draw_board_lines = function() {
     for(var i = 0; i < this.tile_amount; i++) {
       //Draw vertical line
@@ -109,6 +142,7 @@ function BoardView(tile_amount, canvas_width, ctx) {
     //Draw center circle
     this.draw_circle_points();
   };
+
   this.draw_stone = function(stone) {
     if(stone.color != -1) {
       var midpoint_x = stone.x * this.tile_size + this.offset;
@@ -132,6 +166,11 @@ function BoardView(tile_amount, canvas_width, ctx) {
       this.ctx.shadowOffsetX=0;
     }
   };
+
+  /**
+   * Draws a marking of a dead stone by a player
+   * @param  {Mark} mark - Mark object to be drawn
+   */
   this.draw_mark = function(mark) {
     this.ctx.font = "bold 30px Arial";
     this.ctx.fillStyle = 'red';
@@ -141,11 +180,17 @@ function BoardView(tile_amount, canvas_width, ctx) {
     var color_string = (mark.color == 1) ? 'B' : 'W';
     this.ctx.fillText(color_string, mark.x * this.tile_size + this.offset, mark.y * this.tile_size + this.offset);
   };
+
+  /**
+   * Dras all markings
+   * @param  {Array} markings - List of all marks
+   */
   this.draw_markings = function(markings){
     for(var i = 0; i < markings.length; i++) {
       this.draw_mark(markings[i]);
     }
   };
+
   this.draw = function(board) {
     this.draw_background(this.ctx);
     this.draw_board_lines(this.ctx);

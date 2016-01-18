@@ -14,14 +14,12 @@ var names = {client: null, opponent: null, names_set: false};
 
 var click_sound = new Audio("{{ url_for('static', filename='sound/click.mp3') }}");
 
-
+/**
+ * Changes paragraph text when searching for a game.
+ * @param  {String} text - Text to be displayed
+ */
 function change_search_button_text(text){
   $('#search-button').text(text);
-}
-
-//Gameboard interactions
-function update() {
-  //?
 }
 
 function render() {
@@ -30,6 +28,10 @@ function render() {
     board_view.draw_markings(marking_list.mark_list);
 }
 
+/**
+ * Very simple game cycle. Canvas is only rendered on change or mouse move
+ * as a crude optimization. It's quite demanding otherwise.
+ */
 function tick() {
   window.requestAnimationFrame(tick);
   update();
@@ -39,6 +41,12 @@ function tick() {
     GUI.set_names_on_cards(player_color, names);
   canvas_change = false;
 }
+
+/**
+ * In manual marking mode both players can mark stones
+ * they consider dead. A player can dispute the other players
+ * marks and the game will resume normal play until double pass or resign.
+ */
 function activate_manual_marking_mode() {
   marking_mode = true;
   marking_list.clear();
@@ -48,6 +56,7 @@ function activate_manual_marking_mode() {
   GUI.create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent ' + 
     'disagrees on a stone marking, play will begin again, until double pass or resign. When you are done, press complete marking.');
 }
+
 function deactivate_manual_marking_mode() {
   marking_mode = false;
   $('#pass-button').prop('disabled', false);
@@ -55,6 +64,12 @@ function deactivate_manual_marking_mode() {
   $('#marking-button').hide();
   GUI.update_event_history({global_msg: 'A stone has been disputed. Game is back in play.'});
 }
+
+/**
+ * Is called by peer (from Network object) or by client by clicking
+ * to execute a marking of dead stone on the board.
+ * @param  {Mark} mark - A mark object of new mark.
+ */
 function mark_move(mark) {
   if(!marking_list.add(mark)){
     if(mark.color == player_color) { // Player is disputing
@@ -85,6 +100,12 @@ function mark_move(mark) {
     connection.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
   canvas_change = true;
 }
+
+/**
+ * Is called by peer (from Network object) or by client by clicking
+ * to execute moves on the gameboard.
+ * @param  {Dict} move - A move can contain stone placement, pass, resign
+ */
 function play_move(move) {
   //Place stone
   if(board === null) // This is to prevent a situation where one player sends a move to a person who hasn't initalized his board. Can happen.
@@ -119,6 +140,10 @@ function play_move(move) {
   $('#chat-message').focus();
 }
 
+/**
+ * Initializes Board and BoardView upon successfull peer matching. Game begins.
+ * FIXME maybe use some fancy jquery to present the gameboard instead of just show()
+ */
 function init() {
   if(board === null && board_view === null) {
     console.log('initializing game');
@@ -134,6 +159,13 @@ function init() {
     tick();
   }
 }
+
+/**
+ * Reports the game results to the backend
+ * @param  {String} score_string - Describes win state
+ * @param  {Number} winner       - Winner color
+ * @param  {String} sgf          - Smart Game Format string
+ */
 function report_game(score_string, winner, sgf) {
   var black_name;
   var white_name;
@@ -148,6 +180,14 @@ function report_game(score_string, winner, sgf) {
   var size_str = board.size + "x" + board.size;
   connection.report_game_results(black_name, white_name, size_str, winner, score_string, sgf);
 }
+
+/**
+ * Decides which player sends information to the backend
+ * on winner and loser. This can be exploited at the moment. Both players
+ * should send same information and backend should consolidate it somehow.
+ * @param  {String} score_string - Describes win state
+ * @param  {String} sgf          - Smart Game Format string
+ */
 function report_game_results(score_string, sgf) {
   if(board.winner == -1){
     connection.report_draw(names.client); // Each client reports his own draw.
@@ -161,6 +201,10 @@ function report_game_results(score_string, sgf) {
   }
 }
 
+/**
+ * [end_game_cleanup description]
+ * @param  {String} win_str - String describing board win state
+ */
 function end_game_cleanup(win_str) {
   var sgf = board.get_sgf();
   report_game_results(win_str, sgf);
@@ -169,6 +213,10 @@ function end_game_cleanup(win_str) {
   $('#upload-form-container').show();
 }
 
+/**
+ * Ends the game on a resign by any player.
+ * @param  {Number} resign_color - Color of player who resigned.
+ */
 function end_game_on_resign(resign_color) {
   var win_str = (resign_color == player_color) ? names.client : names.opponent;
   win_str += " wins by resignation.";
@@ -176,6 +224,9 @@ function end_game_on_resign(resign_color) {
   end_game_cleanup(win_str);
 }
 
+/**
+ * Ends the game on detected double pass
+ */
 function end_game_on_pass() {
   marking_mode = false;
   board.remove_dead_marks(marking_list);
@@ -197,6 +248,12 @@ function end_game_on_pass() {
   end_game_cleanup(score_string);
 }
 
+/**
+ * Returns the mouse position on canvas
+ * @param  {Canvas} canvas - HTML canvas
+ * @param  {Event} evt - Mouse event object
+ * @return {Dict} Dict containing x and y coords
+ */
 function get_mouse_pos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
   return {
@@ -204,6 +261,12 @@ function get_mouse_pos(canvas, evt) {
       y: evt.clientY - rect.top
     };
 }
+
+/**
+ * This is called when the peer (or client) has marked that
+ * he is ready/not ready with the marking of dead stones.
+ * @param  {dict} status - Can be ready or not ready
+ */
 function update_marking_ready(status) {
   if("client" in status)
     marking_ready.client = status.client;
@@ -219,7 +282,7 @@ function update_marking_ready(status) {
     $('#marking-button').removeClass('player-ready');
 }
 
-$(function() {  //document ready short
+$(function() {
   canvas = document.getElementById('go-canvas');
   ctx = canvas.getContext("2d");
 
@@ -300,7 +363,7 @@ $(function() {  //document ready short
       connection.send({complete_mark: true});
       update_marking_ready({client: true});
     }
-    //Remove stones after coordinats of marks
+    //Remove stones after coordinates of marks
   });
     
     

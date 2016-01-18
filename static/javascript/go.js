@@ -5,10 +5,10 @@ var dir = [{x: 1, y: 0},
                      {x: 0, y: 1},
                      {x: 0, y: -1}]; //Cross direction excluding middle
 var ndir = dir.slice();
-ndir.push({x: 0, y: 0}); //Cross direction with middle coord.
+ndir.push({x: 0, y: 0}); //Cross direction including middle coord.
 
 /**
- * A class used to keep track of manually marked dead stones
+ * Class is used to keep track of manually marked dead stones
  * @param {Number} x - x-coord
  * @param {Number} y - y-coord
  * @param {Numberss} color - color of player that marked tile
@@ -129,7 +129,9 @@ function ScoreGroup(stones) {
     this.add = function(stone) { this.stones.push(stone);};
 }
 /**
- * The go board, with rules.
+ * This is the go board where stones are placed and game rules
+ * are applied. This class is rather large, perhaps the game rules
+ * can be broken out to its own class.
  * @param {Number} size - Size of board
  */
 function Board(size) {
@@ -457,7 +459,7 @@ function Board(size) {
      * Collects information needed for scoring in ScoreGroup object.
      * @param  {Array} queue - Queue used for breadth first search
      * @param  {ScoreGroup} group - The group that is built up through
-     * @return {[type]}       [description]
+     * @return {ScoreGroup}       A ScoreGroup object is returned
      */
     this.recursive_group_score = function(queue, group) {
         if (queue.length < 1)

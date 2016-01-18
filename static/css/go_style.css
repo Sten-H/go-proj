@@ -29,16 +29,20 @@ ul li .chat-name {
 	flex-flow: row;
 	items-align: stretch;
 }
+
 #chat-message {
 	flex: 1;
 }
+
 #chat-send {
 }
+
 #chat-input-wrapper input[type=textfield] {
 	flex: 1;
 	height: 1.5em;
 	margin-top: 10px;
 }
+
 #event-history ul {
 	list-style: none;
 	padding: 0px;
@@ -52,12 +56,14 @@ ul li .chat-name {
 }
 
 #event-history {	
-	/*width: 100%;*/
-	overflow: auto;
+	flex: 1;
+	overflow-y: scroll;
 	background-color: #F2F2F2;
 	box-shadow: 3px 3px 10px #DEDEDE;
-	flex: 1;
+	height: 70vh;
+	max-height: 70vh;
 }
+
 #event-history span {
 	padding-left: 5px;
 }
@@ -85,26 +91,29 @@ ul li .chat-name {
 	font-weight: bold;
 
 
-	/* this is used to animate changes on class */
-	
+	/* this is used to animate changes on class */	
 	-webkit-transition: all 0.8s ease;
 	-moz-transition: all 0.8s ease;
 	-o-transition: all 0.8s ease;
 	transition: all 0.8s ease;
 }
+
 /* This class is added with jquery to indiate active player */
 .active-player {
-	border: 2px dashed #fbcb09;
+	/*border: 2px dashed #fbcb09; replace with something that doesn't change div size*/ 
 	/*box-shadow: 3px 3px 7px #fbcb09; */
 }
+
 .player-ready {
 	border: 2px solid #88F26D;
 	box-shadow: 0px 0px 7px #88F26D;
 }
+
 .player-info h3 {
 	font-size: 1em;
 }
-/* Cotaining the player cards */
+
+/* Containing the player cards */
 #player-info-container {
 	display: flex;
 }
@@ -117,16 +126,17 @@ ul li .chat-name {
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-  	
 }
 
 #search-box {
 	margin-top: 3em;
 	text-align:center ;
 }
+
 .content {
 	
 }
+
 #game-container {
 	flex: 1;
 	height: 90%; /* This is so bad. If I apply display: flex to .content, I dont need it, but it bugs the other views*/
@@ -134,12 +144,14 @@ ul li .chat-name {
 	flex-flow: row nowrap;
 	justify-content: center;
 }
+
 .column-right {
 	flex: 3;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 }
+
 #canvas-wrapper {
 	flex: 1;
 	text-align: center;
@@ -147,6 +159,7 @@ ul li .chat-name {
 	margin-top: 3%;
 	padding: 0;
 }
+
 #go-canvas {
 	border-radius: 5px;
 	box-shadow: 0 0 15px #AAA;
@@ -166,9 +179,11 @@ button:hover, input[type=submit]:hover {
 	background-color: #fdf5ce;
 	color: #c77405;
 }
+
 button:active, input[type=submit]:active {
 	background-color: #ffffff;
 }
+
 button:disabled, input[type=submit]:disabled {
 	border-color: #F7724D;
 }

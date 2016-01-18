@@ -5,16 +5,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from collections import namedtuple
 from threading import Lock
 
-# configuration
+# flask configuration
 # FIXME move this to a config file later.
 DATABASE = 'db/go.db'
 DEBUG = True
 SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
 
-application = Flask(__name__)
-application.config.from_object(__name__)
+application = Flask(__name__)  # Create flask app
+application.config.from_object(__name__)  # Use config described above
 
 
 # Players searching for a game are added to this queue
@@ -23,11 +21,11 @@ player_queue = []  # FIXME this is problematic because does not work with multip
 Player = namedtuple('Player', 'id size')  # This is added to the player_queue
 
 
-# Database functions
 def connect_db():
     return sqlite3.connect(application.config['DATABASE'])
 
 
+# This function is only used outside of the program in the terminal to init the db on changes
 def init_db():
     with closing(connect_db()) as db:
         with application.open_resource('schema.sql', mode='r') as f:
@@ -35,20 +33,32 @@ def init_db():
         db.commit()
 
 
+# Adds player to queue, this can become more advanced taking things such as rating in to account.
 def add_to_queue(player):
     player_queue.append(player)
 
 
+# Before every db request, connect to db
 @application.before_request
 def before_request():
     g.db = connect_db()
 
 
+# Close db connection after request
 @application.teardown_request
 def teardown_request(exception):
     db = getattr(g, 'db', None)
     if db is not None:
         db.close()
+
+
+# Returns all games played by a single user
+def get_player_games(username):
+    cur = g.db.execute('select * from games where black=? or white=? order by game_date desc', [username, username])
+    games = [dict(date=row[1], black=row[2], white=row[3], winner=row[4],
+                  size=row[5], score=row[6], sgf=row[7]) for row in cur.fetchall()]
+    cur.close()
+    return games
 
 
 # Matches players searching for game, returns opponent token if match found, otherwise add to player queue
@@ -176,13 +186,7 @@ def login():
         return render_template('login.html')
 
 
-def get_player_games(username):
-    cur = g.db.execute('select * from games where black=? or white=? order by game_date desc', [username, username])
-    games = [dict(date=row[1], black=row[2], white=row[3], winner=row[4], size=row[5], score=row[6], sgf=row[7]) for row in cur.fetchall()]
-    print "sgf:" + str(games[0]['sgf'])
-    cur.close()
-    return games
-
+# View where user can see match history and some general info
 @application.route('/user/', defaults={'path': ''})
 @application.route('/user/<path:path>')
 def show_user(path):
@@ -198,6 +202,8 @@ def show_user(path):
     games = get_player_games(username)
     return render_template('profile.html', wins=wins, losses=losses, draws=draws, username=username, games=games)
 
+
+# Redirects to above user view but with logged in user's details
 @application.route('/profile')
 def user_profile():
     if is_logged_in():
@@ -206,6 +212,7 @@ def user_profile():
         flash('You need to log in to access your profile')
         return render_template('login.html')
 
+# View where user can make friend requests and challenge friends to game. Just a stub at the moment.
 @application.route('/friends')
 def show_friends():
     if is_logged_in():
@@ -216,6 +223,7 @@ def show_friends():
         return render_template('login.html')
 
 
+# Returns view where user can search and play games
 @application.route('/play')
 def go_view():
     if is_logged_in():
@@ -230,7 +238,6 @@ def go_view():
 def go_view_no_login():
     return render_template('game.html')
 
-
 @application.route('/logout')
 def logout():
     session.pop('logged_in', None)
@@ -242,11 +249,6 @@ def logout():
 @application.route('/test')
 def css_test():
     return render_template('csstest.html')
-
-# FIXME remove later. just a test for review uploading
-@application.route('/eido')
-def eido_test():
-    return render_template('eidotest.html')
 
 if __name__ == '__main__':
     application.run()
