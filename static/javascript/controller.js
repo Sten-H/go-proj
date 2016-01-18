@@ -1,12 +1,12 @@
 "use strict";
 var canvas_width = 800;
 var canvas, ctx;
-var board_view = null;
-var board = null;
-var canvas_change = true; //Rudimentary render optimization. Renders on mouse move, and on board events.
-var marking_mode = false;
+var board_view = null;     // BoardView object. Draws a Board object on a html canvas
+var board = null;          // Board object. Go Engine
+var canvas_change = true;  // Rudimentary render optimization. Renders on mouse move, and on board events.
+var marking_mode = false;  // marking_mode true activates manual marking of dead stones
 var marking_list = new MarkArray();
-var connection = new Connection();
+var connection = new Connection();  // Maintains connection and messaging to peer
 //these things below should probably be in a Player class or something.
 var marking_ready = {client: false, opponent: false};
 var player_color; //Clients color in the game.
@@ -34,7 +34,6 @@ function render() {
  */
 function tick() {
   window.requestAnimationFrame(tick);
-  update();
   if(canvas_change)
     render();
   if(!names.names_set && names.client !== null && names.opponent !== null)
@@ -42,6 +41,27 @@ function tick() {
   canvas_change = false;
 }
 
+/**
+ * Initializes Board and BoardView upon successfull peer matching. Game begins.
+ * FIXME maybe use some fancy jquery to present the gameboard instead of just show()
+ */
+function init() {
+  if(board === null && board_view === null) {
+    $('#search-box').slideUp(1000, function() {
+      $('#game-container').show(); // This is sort of a hack. I show and hide this to get proportions of div.
+      var size = Number($('#size').val());
+      canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
+      board = new Board(size);
+      board_view = new BoardView(size, canvas_width, ctx);
+      GUI.mark_active_player(board.current_player);
+      render(); // Render board once for slide reveal
+      $('#game-container').hide(); // Now hide again to reveal game with slide
+      $('#game-container').show("slide", { direction: "down", easing: "swing" }, 800, function() {
+        tick();
+      });
+    });
+  }
+}
 /**
  * In manual marking mode both players can mark stones
  * they consider dead. A player can dispute the other players
@@ -138,26 +158,6 @@ function play_move(move) {
   GUI.mark_active_player(board.current_player);
   canvas_change = true;
   $('#chat-message').focus();
-}
-
-/**
- * Initializes Board and BoardView upon successfull peer matching. Game begins.
- * FIXME maybe use some fancy jquery to present the gameboard instead of just show()
- */
-function init() {
-  if(board === null && board_view === null) {
-    console.log('initializing game');
-    var size = Number($('#size').val());
-    $('#game-container').show();
-    canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
-    board = new Board(size);
-    board_view = new BoardView(size, canvas_width, ctx);
-    
-    $('#search-box').hide();
-    
-    GUI.mark_active_player(board.current_player);
-    tick();
-  }
 }
 
 /**
@@ -299,24 +299,28 @@ $(function() {
       }
     }
   });
+  
   //Add listener to pass button
   $('#pass-button').click(function(){
     if(player_color == board.current_player && board.winner === null){
       play_move({pass: true, color: player_color});
     }
   });
+
   //Add listener to resign button
   $('#resign-button').click(function(){
     if( board.winner === null) {
       play_move({resign: true, color: player_color});
     }
   });
+
   //Detect mouse movement
   $(canvas).mousemove(function(e){
     var mouse_pos = get_mouse_pos(canvas, e);
     board_view.update_mouse_marker(mouse_pos.x, mouse_pos.y);
     canvas_change = true;
   });
+
   //Detect mouse click
   $(canvas).click(function(e) {
     var mouse_pos = get_mouse_pos(canvas, e);
@@ -330,6 +334,7 @@ $(function() {
       play_move({stone: {x: tile_pos.x, y: tile_pos.y}, color: player_color});
     }
   });
+
   //Detect resize
   $(window).resize(function(evt){
     if(board_view !== null){
@@ -342,6 +347,7 @@ $(function() {
   $(window).unload(function(){
     connection.send({disconnect: true});
   });
+
   //Add functionality to chat button
   $('#chat-send').click(function(){
     var msg = $('#chat-message').val();
@@ -352,6 +358,7 @@ $(function() {
   ({msg: msg, color: player_color});
     }  
   });
+
   //Add functionality to marking complete button
   $('#marking-button').hide();
   $('#marking-button').click(function(){
@@ -365,7 +372,6 @@ $(function() {
     }
     //Remove stones after coordinates of marks
   });
-    
     
   //Add functionality to search button
   $('#search-button').prop('disabled', true); // Disabled until clients has acquired a peer id

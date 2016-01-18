@@ -1,5 +1,16 @@
 "use strict";
+/**
+ * Connection object keeps track of the clients peer (opponent) and
+ * all communications between them. Because peerjs uses alot of callbacks
+ * on network events it's created quite the spaghetti code. This object
+ * will run global functions from controller.js. It's kinda scary.
+ */
 function Connection() {
+  /**
+   * Create new Peer object (peerjs), key is to access a peerjs server (can create my own later)
+   * Stun servers are added to avoid NAT issues, the peer to peer play will not work with it
+   * (except locally).
+   */
   var peer = new Peer({key: 'slhk5rehnzc15rk9', 
                       config: {'iceServers': [
                       { url: 'stun:stun.l.google.com:19302' },
@@ -13,7 +24,6 @@ function Connection() {
 
   this.get_id = function() { return my_id; };
 
-  //Network functions
   /**
    * Send message to peer, message should be sent in a dict like structur {msg: 'hello'}
    * @param  {dict} - Different keywords will have different responses. {move: move}, will play a move
@@ -22,13 +32,19 @@ function Connection() {
     if(conn !== null)
       conn.send(msg);
   };
-  /**
-   * Used to acces send_data from outside sources.
-   */
+
+  // Public wrapper of send_data
   this.send = function(msg) {
     send_data(msg);
   };
 
+  /**
+   * Connects to a player. If request_connect_back is true it will tell the
+   * peer we're connecting to to connect back to this peer. The first connectee will
+   * request connect back.
+   * @param  {String} id                    - peerjs token
+   * @param  {Boolean} request_connect_back - If true will request peer to connect back
+   */
   var connect_to_player = function(id, request_connect_back){
     conn = peer.connect(id);
     conn.on('open', function(){
@@ -40,11 +56,14 @@ function Connection() {
       init();
     });
   };
+
+  // When Peer object is created, set my_id to peerjs token
   peer.on('open', function(id) {
     my_id = id;
-    $('#search-button').prop('disabled', false);
+    $('#search-button').prop('disabled', false);  // Activates search button
     console.log('My peer ID is: ' + id);
   });
+
   //Receiving connection
   peer.on('connection', function(connection) {
   //Connection sending data
@@ -53,7 +72,6 @@ function Connection() {
         player_color = (data.opponent_color == 1) ? 0 : 1;
         connect_to_player(data.id, false); // Connect back to peer
       }
-
       if("opponent_name" in data) { // If we receive opponent name, we store it.
         if(names.opponent === null){
           names.opponent = data.opponent_name;
@@ -63,7 +81,6 @@ function Connection() {
       else if("move" in data){
         play_move(data.move);
       }
-
       else if("disconnect" in data) {
         if(board.winner === null) {
           var loser = (player_color == 1) ? 0 : 1;
@@ -83,16 +100,22 @@ function Connection() {
         console.log(data);
       });
   });
-
+  
+  // The most common error is being matched with a dead token (someone pressing search then exiting before matched)
   peer.on('error', function(err){
     console.log(err);
-    $('body').append("<div class='ui-state-error'>" + err + "</div>");
-
+    $('.content').prepend("<div class='ui-state-error'>" + err + "</div>");
     $('#search-button').prop('disabled', false);
     $('#search-text').text('Welcome! Press the search button to find an opponent');
     // both ids are removed this way and client gets a new one. User should atleast be informed somehow what happened.
   });
 
+  /**
+   * This function is called when search match button is pressed. It will tell the backend
+   * to put the clients peerjs token in the player queue. If a match is found it will return
+   * the opponents peerjs token.
+   * @return {[type]} [description]
+   */
   this.search_match = function() {
     $('#id').val(my_id);
     $.ajax({
@@ -111,6 +134,14 @@ function Connection() {
       }
     }); //End of Ajax
   };
+
+  /**
+   * Updates a users win/loss/draw record by increment of given numbers
+   * @param  {String} name - Username
+   * @param  {Number} win  - Update wins by this amount
+   * @param  {Number} loss - Update losses by this amount
+   * @param  {Number} draw - Update draws by this amount
+   */
   var report_results = function(name, win, loss, draw) {
     $.ajax({
       type : "POST",
@@ -125,15 +156,30 @@ function Connection() {
       }
     }); //End of Ajax
   };
+
   this.report_win = function(name) {
     report_results(name, 1, 0, 0);
   };
+
   this.report_loss = function(name) {
     report_results(name, 0, 1, 0);
   };
+
   this.report_draw = function(name) {
     report_results(name, 0, 0, 1);
   };
+
+  /**
+   * Reports the game specific results to the backend. This includes
+   * board size, end score, winner, player names (by color), and a
+   * smart game format string which contains the whole game play by play and more.
+   * @param  {String} black        - Username of black player
+   * @param  {String} white        - Username of white player
+   * @param  {String} winner       - Username of winner
+   * @param  {Number} size         - Board size of game
+   * @param  {String} score_string - String describing final game state
+   * @param  {String} sgf          - smart game format string, contains whole game history.
+   */
   this.report_game_results = function(black, white, winner, size, score_string, sgf) {
     $.ajax({
       type : "POST",
