@@ -1,7 +1,7 @@
 # go-proj
 ##peer to peer javascript go game
 ###How to run
-If you want to run go-proj:
+If you want to run go-proj:  
 1. Clone this repo  
 2. Make sure you have pip installed  
 3. Enter root directory and "pip install -r requirements.txt" (recommend using a virtualenv before running this)  
