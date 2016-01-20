@@ -12,8 +12,6 @@ var marking_ready = {client: false, opponent: false};
 var player_color; //Clients color in the game.
 var names = {client: null, opponent: null, names_set: false};
 
-var click_sound = new Audio("{{ url_for('static', filename='sound/click.mp3') }}");
-
 /**
  * Changes paragraph text when searching for a game.
  * @param  {String} text - Text to be displayed
@@ -133,7 +131,6 @@ function play_move(move) {
   if("stone" in move){
     var stone = move.stone;
     if(board.place_stone(stone.x, stone.y)){
-      document.getElementById('click-sound').play();
       GUI.update_capture_text(board.cap_black, board.cap_white); 
     }
     else { //If move was legal
