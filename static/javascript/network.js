@@ -18,7 +18,11 @@ function Connection() {
                       { url: 'stun:stun2.l.google.com:19302' },
                       { url: 'stun:stun3.l.google.com:19302' },
                       ]}, 
-                      debug: 2});
+                      debug: 2,
+                      secure: true,
+                      host: 'go.stenh.com',
+                      path: '/peerjs',
+                      port: 443});
   var conn = null;
   var my_id;    //A token to connect to this peer
 
