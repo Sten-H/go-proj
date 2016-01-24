@@ -32,6 +32,7 @@ function BoardView(tile_amount, canvas_width, ctx) {
     this.tile_size = canvas_width / this.tile_amount;
     this.offset = this.tile_size / 2; // The board is not at 0, 0 coordinates in canvas    
     this.ctx = ctx;
+    this.canvas_width = canvas_width;
   
   /**
    * Recalculates size if window is resized
@@ -40,6 +41,7 @@ function BoardView(tile_amount, canvas_width, ctx) {
   this.recalculate_size = function(canvas_width) {
     this.tile_size = canvas_width / this.tile_amount;
     this.offset = this.tile_size / 2;
+    this.canvas_width = canvas_width;
   };
   /**
    * Translates pixel coordinate to grid coordinate. For example
@@ -88,8 +90,8 @@ function BoardView(tile_amount, canvas_width, ctx) {
   this.draw_background = function() {
     //Draw background image (wood texture)
     var img = document.getElementById('wood');
-    var pat = this.ctx.createPattern(img,"no-repeat");
-    this.ctx.rect(0,0, canvas_width, canvas_width);
+    var pat = this.ctx.createPattern(img,"repeat");
+    this.ctx.rect(0,0, this.canvas_width, this.canvas_width);
     this.ctx.fillStyle = pat;
     this.ctx.fill();
   };
