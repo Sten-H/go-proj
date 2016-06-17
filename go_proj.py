@@ -4,6 +4,7 @@ from flask import Flask, json, jsonify, redirect, url_for, request, flash, sessi
 from werkzeug.security import generate_password_hash, check_password_hash
 from collections import namedtuple
 from threading import Lock
+import threading
 
 # flask configuration
 # FIXME move this to a config file later.
@@ -19,7 +20,9 @@ application.config.from_object(__name__)  # Use config described above
 player_queue = []  # FIXME this is problematic because does not work with multiple backend processes.
 #  player_queue_lock = Lock()  # Lock for operations on queue
 Player = namedtuple('Player', 'id size')  # This is added to the player_queue
+# Locks
 
+player_queue_lock = threading.RLock()  # Any reason not to use reentrant lock intead of Lock?
 
 def connect_db():
     return sqlite3.connect(application.config['DATABASE'])
@@ -34,8 +37,12 @@ def init_db():
 
 
 # Adds player to queue, this can become more advanced taking things such as rating in to account.
+# I'm not sure if I want to take this lock here, I could instead require the lock to be taken before
+# calling the function (which is already the case now, so the lock is taken twice, it's a reentrant lock though)
+# This feels safer, but I'm not sure if there's a real downside to it, could be?
 def add_to_queue(player):
-    player_queue.append(player)
+    with player_queue_lock:
+        player_queue.append(player)
 
 
 # Before every db request, connect to db
@@ -64,26 +71,30 @@ def get_player_games(username):
 # Matches players searching for game, returns opponent token if match found, otherwise add to player queue
 @application.route('/search', methods=['POST'])
 def search():
-    id = request.json['id']
-    size = int(request.json['size'])
-    if len(player_queue) == 0:
-        add_to_queue(Player(id, size))
-        return json.dumps({'status': 'In queue'})
-    else:
-        opponent = None
-        for player in player_queue:
-            if (not player.id == id) and player.size == size:
-                opponent = player
-        if opponent:
-            player_queue.remove(opponent)
-            return jsonify(id=opponent.id)
-        else:
+    id = request.json['id']  # peerjs-token
+    size = int(request.json['size'])  # users requested board size.
+    with player_queue_lock:
+        #  The queue is very simple right now, if it's empty, the player is added,
+        # if not empty player is matched with the player already in the queue (if they have same size preference)
+        if len(player_queue) == 0:
             add_to_queue(Player(id, size))
             return json.dumps({'status': 'In queue'})
+        else:  # queue is not empty, look for match
+            opponent = None
+            for player in player_queue:
+                if (not player.id == id) and player.size == size:
+                    opponent = player
+            if opponent:  # opponent was found, remove from queue and return peerjs-id to client.
+                player_queue.remove(opponent)
+                return jsonify(id=opponent.id)
+            else:  # No suitable opponent was found, user is added to queue.
+                add_to_queue(Player(id, size))
+                return json.dumps({'status': 'In queue'})
 
 
 # Ideally this should disconnect users on browser/tab close.
 # Not working, browser will not send or finish the ajax request
+# Long polling/web socket solution?
 @application.route('/disconnect_user', methods=['POST'])
 def disconnect_user():
     id = request.form.get('id')
@@ -251,4 +262,4 @@ def css_test():
     return render_template('csstest.html')
 
 if __name__ == '__main__':
-    application.run()
+    application.run(threaded=True)  # Added threaded=True as a test, remove later.

@@ -17,8 +17,16 @@ At the moment the game can score territories at game end but it has no feature t
 ####Bug with webRTC not supported by browser
 If someone presses search when webRTC is not supported by browser, no one can find a match after that.
 ####Proper multi-process backend
-Right now backend is only run in one process because of a variable needing to be updated on all threads otherwise.
+Right now backend is only run in one process because of a variable needing to be updated on all threads otherwise. High prio
 ####Disconnect during search
-If a user disconnects while searching match this creates a dead token in the python servers list of players searching game.
+If a user disconnects while searching match this creates a dead token in the python servers list of players searching game. Solve this with some sort of long polling thing? High prio
 ####Peerjs on https
 Think I need my own server for peerjs to work with https, but when I do that the peerjs server's respond token is not sent with ssl, and is blocked.
+####Multiple games
+be able to leave and enter games and have them keep going.
+####go board overlapping top bar
+I deleted a flexbox long ago, think that's what's causing this.
+####Friends, challenge friends
+Be able to add friends and challenge them directly.
+####Browser notifications
+Sends a browser notification if opponent makes a move when user has another tab active in the browser.
