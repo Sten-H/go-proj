@@ -348,7 +348,7 @@ $(function() {
     network.send({disconnect: true});
   });
 
-  //Add functionality to chat button. FIXME Something about this is bugged, opponent can't see sent messages.
+  //Add functionality to chat button.
   $('#chat-send').click(function() {
     var msg = $('#chat-message').val();
     $('#chat-message').val('');

@@ -95,7 +95,7 @@ var network = {};  // Namespace for network connection
       }
       else if("msg" in data) {
         console.log('I received a chat message');
-        GUI.update_event_history({msg: data.msg, color: data.color});
+        gui.update_event_history({msg: data.msg, color: data.color});
       }
       else if(data.mark != null)
         mark_move(data.mark);
@@ -200,4 +200,4 @@ var network = {};  // Namespace for network connection
       }
     }); //End of Ajax
   };
-}).apply(connection);  // Apply assign all this above to the connection object so it effetively becomes a namespace.
+}).apply(network);  // Apply assign all this above to the connection object so it effetively becomes a namespace.

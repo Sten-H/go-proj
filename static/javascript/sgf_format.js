@@ -17,7 +17,7 @@ var sgf_format = {};  // Namespace
    * can be called upon to give a fully functional .sgf string that contains a full game.
    * @param {Number} size - Size of board to be documented
    */
-  this.SGFFormat = function (size) {
+  function SGFFormat (size) {
       this.game_info = "(;GM[1]FF[4]"; // should be in start of string when completed
       this.game_info += "SZ" + "[" + size + "]";
       //this.game_info += "KM" + "[" + komi + "]";
@@ -49,9 +49,9 @@ var sgf_format = {};  // Namespace
           //console.log(string);
           return string;
       };
-  };
+  }
   
   this.create_sgf_formatter = function(size) {
-    return new this.SGFFormat(size);
+    return new SGFFormat(size);
   };
 }).apply(sgf_format);
