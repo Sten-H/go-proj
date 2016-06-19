@@ -1,12 +1,14 @@
+// FIXME see if it's possible to wrap everything in anonymous function to global variables of doom? Might be too late.
+
 "use strict";
 var canvas_width = 800;
-var canvas, ctx;
-var board_view = null;     // BoardView object. Draws a Board object on a html canvas
+var canvas, ctx;           // html canvas variables.
+var board_view = null;     // BoardView object. Draws a Board object on a html canvas.
 var board = null;          // Board object. Go Engine
 var canvas_change = true;  // Rudimentary render optimization. Renders on mouse move, and on board events.
 var marking_mode = false;  // marking_mode true activates manual marking of dead stones
 var marking_list = new MarkArray();
-var connection = new Connection();  // Maintains connection and messaging to peer
+
 //these things below should probably be in a Player class or something.
 var marking_ready = {client: false, opponent: false};
 var player_color; //Clients color in the game.
@@ -35,7 +37,7 @@ function tick() {
   if(canvas_change)
     render();
   if(!names.names_set && names.client !== null && names.opponent !== null)
-    GUI.set_names_on_cards(player_color, names);
+    gui.set_names_on_cards(player_color, names);
   canvas_change = false;
 }
 
@@ -50,8 +52,8 @@ function init() {
       var size = Number($('#size').val());
       canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
       board = new Board(size);
-      board_view = new BoardView(size, canvas_width, ctx);
-      GUI.mark_active_player(board.current_player);
+      board_view = draw.create_boardview(size, canvas_width, ctx);
+      gui.mark_active_player(board.current_player);
       render(); // Render board once for slide reveal
       $('#game-container').hide(); // Now hide again to reveal game with slide
       $('#game-container').show("slide", { direction: "down", easing: "swing" }, 800, function() {
@@ -60,6 +62,7 @@ function init() {
     });
   }
 }
+
 /**
  * In manual marking mode both players can mark stones
  * they consider dead. A player can dispute the other players
@@ -71,7 +74,7 @@ function activate_manual_marking_mode() {
   $('#pass-button').prop('disabled', true);
   $('#resign-button').prop('disabled', true);
   $('#marking-button').show();
-  GUI.create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent ' + 
+  gui.create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent ' + 
     'disagrees on a stone marking, play will begin again, until double pass or resign. When you are done, press complete marking.');
 }
 
@@ -80,11 +83,11 @@ function deactivate_manual_marking_mode() {
   $('#pass-button').prop('disabled', false);
   $('#resign-button').prop('disabled', false);
   $('#marking-button').hide();
-  GUI.update_event_history({global_msg: 'A stone has been disputed. Game is back in play.'});
+  gui.update_event_history({global_msg: 'A stone has been disputed. Game is back in play.'});
 }
 
 /**
- * Is called by peer (from Network object) or by client by clicking
+ * Function is called by peer (from Network object) or by client by clicking
  * to execute a marking of dead stone on the board.
  * @param  {Mark} mark - A mark object of new mark.
  */
@@ -101,7 +104,7 @@ function mark_move(mark) {
         buttons: {
           "Yes": function() {
             deactivate_manual_marking_mode();
-            connection.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
+            network.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
             $(this).dialog("close");
           },
           "Cancel": function() {
@@ -115,7 +118,7 @@ function mark_move(mark) {
     }
   }
   else if(mark.color == player_color)
-    connection.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
+    network.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
   canvas_change = true;
 }
 
@@ -131,10 +134,10 @@ function play_move(move) {
   if("stone" in move){
     var stone = move.stone;
     if(board.place_stone(stone.x, stone.y)){
-      GUI.update_capture_text(board.cap_black, board.cap_white); 
+      gui.update_capture_text(board.cap_black, board.cap_white); 
     }
     else { //If move was legal
-      GUI.create_ok_dialog('Illegal move', 'That move is illegal');
+      gui.create_ok_dialog('Illegal move', 'That move is illegal');
       return;
     }
   }
@@ -148,11 +151,11 @@ function play_move(move) {
     end_game_on_resign();
   }
   if(move.color == player_color){
-      connection.send({move: move});
+      network.send({move: move});
   }
-  GUI.update_event_history(move);
-  GUI.update_to_play(board.current_player);
-  GUI.mark_active_player(board.current_player);
+  gui.update_event_history(move);
+  gui.update_to_play(board.current_player);
+  gui.mark_active_player(board.current_player);
   canvas_change = true;
   $('#chat-message').focus();
 }
@@ -175,7 +178,7 @@ function report_game(score_string, winner, sgf) {
   }
 
   var size_str = board.size + "x" + board.size;
-  connection.report_game_results(black_name, white_name, size_str, winner, score_string, sgf);
+  network.report_game_results(black_name, white_name, size_str, winner, score_string, sgf);
 }
 
 /**
@@ -187,13 +190,13 @@ function report_game(score_string, winner, sgf) {
  */
 function report_game_results(score_string, sgf) {
   if(board.winner == -1){
-    connection.report_draw(names.client); // Each client reports his own draw.
+    network.report_draw(names.client); // Each client reports his own draw.
     if(player_color == 1) //black reports the game info. Arbitrary choice.
       report_game(score_string, 'draw', sgf);
   }
   else if(board.winner == player_color) {  // Winner reports results, most likely to still have tab open, resign by tab close and such.
-    connection.report_win(names.client);
-    connection.report_loss(names.opponent);
+    network.report_win(names.client);
+    network.report_loss(names.opponent);
     report_game(score_string, names.client, sgf);
   }
 }
@@ -217,7 +220,7 @@ function end_game_cleanup(win_str) {
 function end_game_on_resign(resign_color) {
   var win_str = (resign_color == player_color) ? names.client : names.opponent;
   win_str += " wins by resignation.";
-  GUI.create_ok_dialog('Winner!', win_str);
+  gui.create_ok_dialog('Winner!', win_str);
   end_game_cleanup(win_str);
 }
 
@@ -227,7 +230,7 @@ function end_game_on_resign(resign_color) {
 function end_game_on_pass() {
   marking_mode = false;
   board.remove_dead_marks(marking_list);
-  GUI.update_capture_text(board.cap_back, board.cap_white);
+  gui.update_capture_text(board.cap_back, board.cap_white);
   
   //Create a string for dialog
   var winner_color = board.determine_winner();
@@ -238,9 +241,9 @@ function end_game_on_pass() {
   canvas_change = true;
 
   if(winner_color == -1)
-    GUI.create_ok_dialog('Draw', 'The game is a draw!' + score_string);
+    gui.create_ok_dialog('Draw', 'The game is a draw!' + score_string);
   else
-    GUI.create_ok_dialog('Winner!', win_str);
+    gui.create_ok_dialog('Winner!', win_str);
   score_string = 'Black: ' + board.final_score.black + ", White: " + board.final_score.white; // reuse for db entry
   end_game_cleanup(score_string);
 }
@@ -342,17 +345,16 @@ $(function() {
   });
 
   $(window).unload(function(){
-    connection.send({disconnect: true});
+    network.send({disconnect: true});
   });
 
-  //Add functionality to chat button
-  $('#chat-send').click(function(){
+  //Add functionality to chat button.
+  $('#chat-send').click(function() {
     var msg = $('#chat-message').val();
     $('#chat-message').val('');
     if(msg !== ''){
-      connection.send({msg: msg, color: player_color});
-      GUI.update_event_history
-  ({msg: msg, color: player_color});
+      network.send({msg: msg, color: player_color});
+      gui.update_event_history({msg: msg, color: player_color});
     }  
   });
 
@@ -361,10 +363,10 @@ $(function() {
   $('#marking-button').click(function(){
     if(marking_ready.client === true) {
       update_marking_ready({client: false});
-      connection.send({complete_mark: false});
+      network.send({complete_mark: false});
     }
     else {
-      connection.send({complete_mark: true});
+      network.send({complete_mark: true});
       update_marking_ready({client: true});
     }
     //Remove stones after coordinates of marks
@@ -377,6 +379,6 @@ $(function() {
       names.client = $('#username').val(); //FIXME
       $('#search-text').text('Searching for opponent...');
       $(this).prop('disabled', true);
-      connection.search_match();
+      network.search_match();
   }); //End of search button
 }); //End of document ready

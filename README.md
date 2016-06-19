@@ -14,19 +14,21 @@ The scoring rules are according to chinese rules. I like japanese rules better, 
 At the moment the game can score territories at game end but it has no feature to classify stones as dead (in endgame, this is a tough problem in many cases).
 
 ###To do
-####Bug with webRTC not supported by browser
-If someone presses search when webRTC is not supported by browser, no one can find a match after that.
-####Disconnect during search
-If a user disconnects while searching match this creates a dead token in the python servers list of players searching game. Solve this with some sort of long polling thing or websocket? High prio
-####Cancel search
-Replace the search button with a cancel button during search maybe?
-####Peerjs on https
-Think I need my own server for peerjs to work with https, but when I do that the peerjs server's respond token is not sent with ssl, and is blocked.
-####Multiple games
+####Complex: Disconnect during search
+If a user disconnects while searching match this creates a dead token in the python servers list of players searching game. Solve this with some sort of long polling thing or websocket, probably websocket? High prio
+####Complex: Multiple games
 be able to leave and enter games and have them keep going.
-####go board overlapping top bar
-I deleted a flexbox long ago, think that's what's causing this.
-####Friends, challenge friends
+####Medium: Bug with webRTC not supported by browser
+If someone presses search when webRTC is not supported by browser, no one can find a match after that.
+####Medium: Friends, challenge friends
 Be able to add friends and challenge them directly.
-####Browser notifications
-Sends a browser notification if opponent makes a move when user has another tab active in the browser.
+####Medium: Browser notifications
+Sends a browser notification if opponent makes a move when user has another tab active in the browser
+####Easy: go board overlapping top bar
+I deleted a flexbox long ago, think that's what's causing this.
+####Easy:Cancel search
+Replace the search button with a cancel button during search maybe?
+####Easy: Make searching for game nice
+Have a spinning wheel or something, also a cancel button.
+####Peerjs on https
+Think I need my own server for peerjs to work with https, but when I do that the peerjs server's respond token is not sent with ssl, and is blocked. Edit: But it does work on https? Did I fix it?

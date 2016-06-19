@@ -1,17 +1,18 @@
-"use strict";
 /**
- * Connection object keeps track of the clients peer (opponent) and
+ * Connection functions keeps track of the clients peer (opponent) and
  * all communications between them. Because peerjs uses alot of callbacks
  * on network events it's created quite the spaghetti code. This object
  * will run global functions from controller.js. It's kinda scary.
  */
-function Connection() {
+var network = {};  // Namespace for network connection
+(function (context) {
+  'use strict';
   /**
    * Create new Peer object (peerjs), key is to access a peerjs server (can create my own later)
-   * Stun servers are added to avoid NAT issues, the peer to peer play will not work with it
-   * (except locally).
+   * Stun servers are added to avoid NAT issues, the peer to peer play will not work without it
+   * except locally.
    */
-  var peer = new Peer({key: 'slhk5rehnzc15rk9', 
+  var peer = new Peer({key: 'slhk5rehnzc15rk9',
                       config: {'iceServers': [
                       { url: 'stun:stun.l.google.com:19302' },
                       { url: 'stun:stun1.l.google.com:19302' },
@@ -23,7 +24,7 @@ function Connection() {
                       host: 'go.stenh.com',
                       path: '/peerjs',
                       port: 443});
-  var conn = null;
+  var conn = null;  // I don't remember this clearly, but I think this is the connection for this peer to send to other peer
   var my_id;    //A token to connect to this peer
 
   this.get_id = function() { return my_id; };
@@ -63,14 +64,14 @@ function Connection() {
 
   // When Peer object is created, set my_id to peerjs token
   peer.on('open', function(id) {
-    my_id = id;
+    my_id = id;  // peerjs token is assigned
     $('#search-button').prop('disabled', false);  // Activates search button
     console.log('My peer ID is: ' + id);
   });
 
   //Receiving connection
   peer.on('connection', function(connection) {
-  //Connection sending data
+    //Connection sending data
     connection.on('data', function(data){
       if("id" in data) {
         player_color = (data.opponent_color == 1) ? 0 : 1;
@@ -93,7 +94,8 @@ function Connection() {
         }
       }
       else if("msg" in data) {
-        GUI.update_event_history({msg: data.msg, color: data.color});
+        console.log('I received a chat message');
+        gui.update_event_history({msg: data.msg, color: data.color});
       }
       else if(data.mark != null)
         mark_move(data.mark);
@@ -198,4 +200,4 @@ function Connection() {
       }
     }); //End of Ajax
   };
-}
+}).apply(network);  // Apply assign all this above to the connection object so it effetively becomes a namespace.
