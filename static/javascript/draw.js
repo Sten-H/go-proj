@@ -213,6 +213,6 @@ var draw = {};
    * @returns {Object}              BoardView object
    */
   this.create_boardview = function(size, canvas_width, ctx) {
-    return new BoardView(size, canvas_width, ctx)
-  }
+    return new BoardView(size, canvas_width, ctx);
+  };
 }).apply(draw);

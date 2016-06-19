@@ -8,7 +8,7 @@ var board = null;          // Board object. Go Engine
 var canvas_change = true;  // Rudimentary render optimization. Renders on mouse move, and on board events.
 var marking_mode = false;  // marking_mode true activates manual marking of dead stones
 var marking_list = new MarkArray();
-//var connection = new Connection();  // Maintains connection and messaging to peer
+
 //these things below should probably be in a Player class or something.
 var marking_ready = {client: false, opponent: false};
 var player_color; //Clients color in the game.
@@ -104,7 +104,7 @@ function mark_move(mark) {
         buttons: {
           "Yes": function() {
             deactivate_manual_marking_mode();
-            connection.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
+            network.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
             $(this).dialog("close");
           },
           "Cancel": function() {
@@ -118,7 +118,7 @@ function mark_move(mark) {
     }
   }
   else if(mark.color == player_color)
-    connection.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
+    network.send({mark: {x: mark.x, y: mark.y, color: mark.color}});
   canvas_change = true;
 }
 
@@ -151,7 +151,7 @@ function play_move(move) {
     end_game_on_resign();
   }
   if(move.color == player_color){
-      connection.send({move: move});
+      network.send({move: move});
   }
   gui.update_event_history(move);
   gui.update_to_play(board.current_player);
@@ -178,7 +178,7 @@ function report_game(score_string, winner, sgf) {
   }
 
   var size_str = board.size + "x" + board.size;
-  connection.report_game_results(black_name, white_name, size_str, winner, score_string, sgf);
+  network.report_game_results(black_name, white_name, size_str, winner, score_string, sgf);
 }
 
 /**
@@ -190,13 +190,13 @@ function report_game(score_string, winner, sgf) {
  */
 function report_game_results(score_string, sgf) {
   if(board.winner == -1){
-    connection.report_draw(names.client); // Each client reports his own draw.
+    network.report_draw(names.client); // Each client reports his own draw.
     if(player_color == 1) //black reports the game info. Arbitrary choice.
       report_game(score_string, 'draw', sgf);
   }
   else if(board.winner == player_color) {  // Winner reports results, most likely to still have tab open, resign by tab close and such.
-    connection.report_win(names.client);
-    connection.report_loss(names.opponent);
+    network.report_win(names.client);
+    network.report_loss(names.opponent);
     report_game(score_string, names.client, sgf);
   }
 }
@@ -345,17 +345,16 @@ $(function() {
   });
 
   $(window).unload(function(){
-    connection.send({disconnect: true});
+    network.send({disconnect: true});
   });
 
-  //Add functionality to chat button
-  $('#chat-send').click(function(){
+  //Add functionality to chat button. FIXME Something about this is bugged, opponent can't see sent messages.
+  $('#chat-send').click(function() {
     var msg = $('#chat-message').val();
     $('#chat-message').val('');
     if(msg !== ''){
-      connection.send({msg: msg, color: player_color});
-      gui.update_event_history
-  ({msg: msg, color: player_color});
+      network.send({msg: msg, color: player_color});
+      gui.update_event_history({msg: msg, color: player_color});
     }  
   });
 
@@ -364,10 +363,10 @@ $(function() {
   $('#marking-button').click(function(){
     if(marking_ready.client === true) {
       update_marking_ready({client: false});
-      connection.send({complete_mark: false});
+      network.send({complete_mark: false});
     }
     else {
-      connection.send({complete_mark: true});
+      network.send({complete_mark: true});
       update_marking_ready({client: true});
     }
     //Remove stones after coordinates of marks
@@ -380,6 +379,6 @@ $(function() {
       names.client = $('#username').val(); //FIXME
       $('#search-text').text('Searching for opponent...');
       $(this).prop('disabled', true);
-      connection.search_match();
+      network.search_match();
   }); //End of search button
 }); //End of document ready

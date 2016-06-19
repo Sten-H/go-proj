@@ -30,3 +30,5 @@ I deleted a flexbox long ago, think that's what's causing this.
 Be able to add friends and challenge them directly.
 ####Browser notifications
 Sends a browser notification if opponent makes a move when user has another tab active in the browser.
+####In game chat not working
+Sending a message only displays it for the one who sent it in /play when playing. Might have happene when I created the network namespace for network.js?

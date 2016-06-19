@@ -1,5 +1,5 @@
 /**
- * The GUI namespace handles all dynamic updates to GUI elements such
+ * The gui namespace functions handles all dynamic updates to GUI elements such
  * as the event history (list of played moves and chat messages)
  */
 var gui = {};  // This really shouldn't be in caps

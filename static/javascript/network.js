@@ -4,7 +4,7 @@
  * on network events it's created quite the spaghetti code. This object
  * will run global functions from controller.js. It's kinda scary.
  */
-var connection = {};  // Namespace for network connection
+var network = {};  // Namespace for network connection
 (function (context) {
   'use strict';
   /**
@@ -94,6 +94,7 @@ var connection = {};  // Namespace for network connection
         }
       }
       else if("msg" in data) {
+        console.log('I received a chat message');
         GUI.update_event_history({msg: data.msg, color: data.color});
       }
       else if(data.mark != null)
