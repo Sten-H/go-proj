@@ -52,7 +52,7 @@ function init() {
       var size = Number($('#size').val());
       canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
       board = new Board(size);
-      board_view = new BoardView(size, canvas_width, ctx);
+      board_view = draw.create_boardview(size, canvas_width, ctx);
       gui.mark_active_player(board.current_player);
       render(); // Render board once for slide reveal
       $('#game-container').hide(); // Now hide again to reveal game with slide
