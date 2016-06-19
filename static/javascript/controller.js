@@ -1,12 +1,14 @@
+// FIXME see if it's possible to wrap everything in anonymous function to global variables of doom? Might be too late.
+
 "use strict";
 var canvas_width = 800;
-var canvas, ctx;
-var board_view = null;     // BoardView object. Draws a Board object on a html canvas
+var canvas, ctx;           // html canvas variables.
+var board_view = null;     // BoardView object. Draws a Board object on a html canvas.
 var board = null;          // Board object. Go Engine
 var canvas_change = true;  // Rudimentary render optimization. Renders on mouse move, and on board events.
 var marking_mode = false;  // marking_mode true activates manual marking of dead stones
 var marking_list = new MarkArray();
-var connection = new Connection();  // Maintains connection and messaging to peer
+//var connection = new Connection();  // Maintains connection and messaging to peer
 //these things below should probably be in a Player class or something.
 var marking_ready = {client: false, opponent: false};
 var player_color; //Clients color in the game.
@@ -35,7 +37,7 @@ function tick() {
   if(canvas_change)
     render();
   if(!names.names_set && names.client !== null && names.opponent !== null)
-    GUI.set_names_on_cards(player_color, names);
+    gui.set_names_on_cards(player_color, names);
   canvas_change = false;
 }
 
@@ -51,7 +53,7 @@ function init() {
       canvas.width = canvas.height = canvas_width = Math.min($('#canvas-wrapper').width(), $('#canvas-wrapper').height());
       board = new Board(size);
       board_view = new BoardView(size, canvas_width, ctx);
-      GUI.mark_active_player(board.current_player);
+      gui.mark_active_player(board.current_player);
       render(); // Render board once for slide reveal
       $('#game-container').hide(); // Now hide again to reveal game with slide
       $('#game-container').show("slide", { direction: "down", easing: "swing" }, 800, function() {
@@ -60,6 +62,7 @@ function init() {
     });
   }
 }
+
 /**
  * In manual marking mode both players can mark stones
  * they consider dead. A player can dispute the other players
@@ -71,7 +74,7 @@ function activate_manual_marking_mode() {
   $('#pass-button').prop('disabled', true);
   $('#resign-button').prop('disabled', true);
   $('#marking-button').show();
-  GUI.create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent ' + 
+  gui.create_ok_dialog('Mark dead stones', 'You can now mark dead stones, if you opponent ' + 
     'disagrees on a stone marking, play will begin again, until double pass or resign. When you are done, press complete marking.');
 }
 
@@ -80,11 +83,11 @@ function deactivate_manual_marking_mode() {
   $('#pass-button').prop('disabled', false);
   $('#resign-button').prop('disabled', false);
   $('#marking-button').hide();
-  GUI.update_event_history({global_msg: 'A stone has been disputed. Game is back in play.'});
+  gui.update_event_history({global_msg: 'A stone has been disputed. Game is back in play.'});
 }
 
 /**
- * Is called by peer (from Network object) or by client by clicking
+ * Function is called by peer (from Network object) or by client by clicking
  * to execute a marking of dead stone on the board.
  * @param  {Mark} mark - A mark object of new mark.
  */
@@ -131,10 +134,10 @@ function play_move(move) {
   if("stone" in move){
     var stone = move.stone;
     if(board.place_stone(stone.x, stone.y)){
-      GUI.update_capture_text(board.cap_black, board.cap_white); 
+      gui.update_capture_text(board.cap_black, board.cap_white); 
     }
     else { //If move was legal
-      GUI.create_ok_dialog('Illegal move', 'That move is illegal');
+      gui.create_ok_dialog('Illegal move', 'That move is illegal');
       return;
     }
   }
@@ -150,9 +153,9 @@ function play_move(move) {
   if(move.color == player_color){
       connection.send({move: move});
   }
-  GUI.update_event_history(move);
-  GUI.update_to_play(board.current_player);
-  GUI.mark_active_player(board.current_player);
+  gui.update_event_history(move);
+  gui.update_to_play(board.current_player);
+  gui.mark_active_player(board.current_player);
   canvas_change = true;
   $('#chat-message').focus();
 }
@@ -217,7 +220,7 @@ function end_game_cleanup(win_str) {
 function end_game_on_resign(resign_color) {
   var win_str = (resign_color == player_color) ? names.client : names.opponent;
   win_str += " wins by resignation.";
-  GUI.create_ok_dialog('Winner!', win_str);
+  gui.create_ok_dialog('Winner!', win_str);
   end_game_cleanup(win_str);
 }
 
@@ -227,7 +230,7 @@ function end_game_on_resign(resign_color) {
 function end_game_on_pass() {
   marking_mode = false;
   board.remove_dead_marks(marking_list);
-  GUI.update_capture_text(board.cap_back, board.cap_white);
+  gui.update_capture_text(board.cap_back, board.cap_white);
   
   //Create a string for dialog
   var winner_color = board.determine_winner();
@@ -238,9 +241,9 @@ function end_game_on_pass() {
   canvas_change = true;
 
   if(winner_color == -1)
-    GUI.create_ok_dialog('Draw', 'The game is a draw!' + score_string);
+    gui.create_ok_dialog('Draw', 'The game is a draw!' + score_string);
   else
-    GUI.create_ok_dialog('Winner!', win_str);
+    gui.create_ok_dialog('Winner!', win_str);
   score_string = 'Black: ' + board.final_score.black + ", White: " + board.final_score.white; // reuse for db entry
   end_game_cleanup(score_string);
 }
@@ -351,7 +354,7 @@ $(function() {
     $('#chat-message').val('');
     if(msg !== ''){
       connection.send({msg: msg, color: player_color});
-      GUI.update_event_history
+      gui.update_event_history
   ({msg: msg, color: player_color});
     }  
   });
