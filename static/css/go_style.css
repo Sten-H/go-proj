@@ -164,12 +164,11 @@ ul li .chat-name {
 	border-radius: 5px;
 	box-shadow: 0 0 15px #AAA;
 }
-
+/* Why style the buttons differently in game?
 button, input[type=submit] {
 	border-radius: 2px;
 	border: 1px solid #cccccc;
 	background-color: #f6f6f6;
-	/*box-shadow: 2px 2px gray;*/
 	font-size: 1em;
 	color: #1c94c4;
 	margin: 20px .5em;
@@ -187,3 +186,4 @@ button:active, input[type=submit]:active {
 button:disabled, input[type=submit]:disabled {
 	border-color: #F7724D;
 }
+*/
