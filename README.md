@@ -30,5 +30,7 @@ I deleted a flexbox long ago, think that's what's causing this.
 Replace the search button with a cancel button during search maybe?
 ####Easy: Make searching for game nice
 Have a spinning wheel or something, also a cancel button.
+####Easy: 
+winner and board_size are mixed up when game is saved in games table in db, so winner gets assigned "9x9" for example.
 ####Peerjs on https
 Think I need my own server for peerjs to work with https, but when I do that the peerjs server's respond token is not sent with ssl, and is blocked. Edit: But it does work on https? Did I fix it?
