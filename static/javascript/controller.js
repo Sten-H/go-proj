@@ -43,9 +43,12 @@ function tick() {
 
 /**
  * Initializes Board and BoardView upon successfull peer matching. Game begins.
- * FIXME maybe use some fancy jquery to present the gameboard instead of just show()
+ * Right now this is usually called from network namespace (network.js), that's really
+ * weird. It can also be called if the opponent sends a move but client hasn't initialized
+ * board yet, in that case it is called from controller.js
  */
 function init() {
+  notify.gameFound(names.opponent);  // Sends a html notification that game is starting.
   if(board === null && board_view === null) {
     $('#search-box').slideUp(1000, function() {
       $('#game-container').show(); // This is sort of a hack. I show and hide this to get proportions of div.
@@ -62,7 +65,6 @@ function init() {
     });
   }
 }
-
 /**
  * In manual marking mode both players can mark stones
  * they consider dead. A player can dispute the other players
@@ -87,7 +89,7 @@ function deactivate_manual_marking_mode() {
 }
 
 /**
- * Function is called by peer (from Network object) or by client by clicking
+ * Function is called by peer (from network namespace) or by client by clicking
  * to execute a marking of dead stone on the board.
  * @param  {Mark} mark - A mark object of new mark.
  */
@@ -150,8 +152,13 @@ function play_move(move) {
     board.player_resign(move.color);
     end_game_on_resign();
   }
-  if(move.color == player_color){
+  // Send move to opponent if client made the move
+  if(move.color == player_color) {  
       network.send({move: move});
+  }
+  // Notify client if opponent made the move
+  else {
+    notify.opponentMove(names.opponent, move);
   }
   gui.update_event_history(move);
   gui.update_to_play(board.current_player);
