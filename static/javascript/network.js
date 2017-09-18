@@ -20,10 +20,13 @@ var network = {};  // Namespace for network connection
                       { url: 'stun:stun3.l.google.com:19302' },
                       ]}, 
                       debug: 2,
-                      secure: true,
+                      //secure: true,
+                      secure: false,
                       host: 'go.stenh.com',
                       path: '/peerjs',
-                      port: 443});
+                      port: 80
+			});
+                      //port: 443});
   var conn = null;  // I don't remember this clearly, but I think this is the connection for this peer to send to other peer
   var my_id;    //A token to connect to this peer
 
