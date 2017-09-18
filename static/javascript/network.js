@@ -18,12 +18,15 @@ var network = {};  // Namespace for network connection
                       { url: 'stun:stun1.l.google.com:19302' },
                       { url: 'stun:stun2.l.google.com:19302' },
                       { url: 'stun:stun3.l.google.com:19302' },
-                      ]}, 
-                      debug: 2,
-                      secure: true,
-                      host: 'go.stenh.com',
-                      path: '/peerjs',
-                      port: 443});
+                      ]},
+                      debug: 0,
+                      //secure: true,
+                      // secure: false,
+                      // host: 'go.stenh.com',
+                      // path: '/peerjs',
+                      // port: 80
+			});
+                      //port: 443});
   var conn = null;  // I don't remember this clearly, but I think this is the connection for this peer to send to other peer
   var my_id;    //A token to connect to this peer
 
@@ -53,7 +56,7 @@ var network = {};  // Namespace for network connection
   var connect_to_player = function(id, request_connect_back){
     conn = peer.connect(id);
     conn.on('open', function(){
-      if(request_connect_back === true){
+      if(request_connect_back === true) {
         player_color = Math.round(Math.random()); // Random a color
         conn.send({id: my_id, opponent_color: player_color}); //Send info so peer can connect back
       }          
@@ -71,6 +74,7 @@ var network = {};  // Namespace for network connection
 
   //Receiving connection
   peer.on('connection', function(connection) {
+      
     //Connection sending data
     connection.on('data', function(data){
       if("id" in data) {
