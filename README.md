@@ -1,6 +1,6 @@
 # go-proj
-##peer to peer javascript go game
-###How to run
+## peer to peer javascript go game
+### How to run
 If you want to run go-proj:  
 1. Clone this repo  
 2. Make sure you have pip installed  
@@ -8,31 +8,25 @@ If you want to run go-proj:
 4. "python go_proj.py"  
 
 Alternatively you can go to [go.stenh.com](http://go.stenh.com), it is not guaranteed to be up but it is very likely.
-###Introduction
+### Introduction
 This is the game of go implemented in javascript using a python flask backend to match players who can then play peer to peer (with peerjs).
 The scoring rules are according to chinese rules. I like japanese rules better, but chinese rules are better with a weak scoring system (which this definitely is) becaue chinese scoring does not penaize plays in your own territory.
 At the moment the game can score territories at game end but it has no feature to classify stones as dead (in endgame, this is a tough problem in many cases).
 
-###To do
-####Complex: Disconnect during search
+### To do
+#### Complex: Disconnect during search
 If a user disconnects while searching match this creates a dead token in the python servers list of players searching game. Solve this with some sort of long polling thing or websocket, probably websocket? High prio
-####Complex: Multiple games
+#### Complex: Multiple games
 be able to leave and enter games and have them keep going.
-####Medium: Bug with webRTC not supported by browser
+#### Medium: Bug with webRTC not supported by browser
 If someone presses search when webRTC is not supported by browser, no one can find a match after that.
-####Medium: Friends, challenge friends
+#### Medium: Friends, challenge friends
 Be able to add friends and challenge them directly.
-####Medium: Browser notifications
-Sends a browser notification if opponent makes a move when user has another tab active in the browser
-####Easy: go board overlapping top bar
+#### Easy: go board overlapping top bar
 I deleted a flexbox long ago, think that's what's causing this.
-####Easy:Cancel search
+#### Easy:Cancel search
 Replace the search button with a cancel button during search maybe?
-####Easy: Make searching for game nice
+#### Easy: Make searching for game nice
 Have a spinning wheel or something, also a cancel button.
-####Easy: inserts in to games table are wrong
-winner and board_size are mixed up when game is saved in games table in db, so winner gets assigned "9x9" for example.
-####Easy: Look in to peerjs losing connection?
-For example idle at /play without searching. Does peerjs expect something to happen with token within some time frame or it is revoked? Perhaps if the token doesn't get a connection established within a certain time? Could solve this by creating token upon search completion, but would require some changes to backend as well.
-####Peerjs on https
-Think I need my own server for peerjs to work with https, but when I do that the peerjs server's respond token is not sent with ssl, and is blocked. Edit: But it does work on https? Did I fix it?
+#### Peerjs on https
+This did work before, I think it has something to do with the proxy set up in sites-available?
