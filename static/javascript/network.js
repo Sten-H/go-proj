@@ -12,21 +12,38 @@ var network = {};  // Namespace for network connection
    * Stun servers are added to avoid NAT issues, the peer to peer play will not work without it
    * except locally.
    */
-  var peer = new Peer({key: 'slhk5rehnzc15rk9',
+  var peer = new Peer({
+	              //key: 'slhk5rehnzc15rk9',
                       config: {'iceServers': [
-                      { url: 'stun:stun.l.google.com:19302' },
-                      { url: 'stun:stun1.l.google.com:19302' },
-                      { url: 'stun:stun2.l.google.com:19302' },
-                      { url: 'stun:stun3.l.google.com:19302' },
+{url:'stun:stun.l.google.com:19302'},
+{url:'stun:stun1.l.google.com:19302'},
+{url:'stun:stun2.l.google.com:19302'},
+{url:'stun:stun3.l.google.com:19302'},
+//{url:'stun:stun4.l.google.com:19302'},
+//{url:'stun:stunserver.org'},
+//{
+//	url: 'turn:numb.viagenie.ca',
+//	credential: 'muazkh',
+//	username: 'webrtc@live.com'
+//},
+//{
+//	url: 'turn:192.158.29.39:3478?transport=udp',
+//	credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+//	username: '28224511:1379330808'
+//},
+{
+	url: 'turn:192.158.29.39:3478?transport=tcp',
+	credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+	username: '28224511:1379330808'
+}
                       ]},
                       debug: 0,
-                      //secure: true,
-                      // secure: false,
-                      // host: 'go.stenh.com',
-                      // path: '/peerjs',
-                      // port: 80
-			});
-                      //port: 443});
+                      secure: true,
+                      //secure: false,
+                       host: 'go.stenh.com',
+                       path: '/peer',
+                       port: 443
+		      });
   var conn = null;  // I don't remember this clearly, but I think this is the connection for this peer to send to other peer
   var my_id;    //A token to connect to this peer
 
@@ -58,26 +75,35 @@ var network = {};  // Namespace for network connection
     conn.on('open', function(){
       if(request_connect_back === true) {
         player_color = Math.round(Math.random()); // Random a color
-        conn.send({id: my_id, opponent_color: player_color}); //Send info so peer can connect back
+	// FIXME Ok so for some reason, if this timeout is not used, this send will fail silently. It's odd because this will only trigger
+	// on an already opened connection so why does it need to wait further more? It should already have tried ice candidates and such?
+	// Setting the timeout time fairly high just to be sure this won't cause a problem for now.
+	// This bug appears on Chrome, but Firefox works without the timeout. I feel dumb
+	setTimeout(() => {
+        	conn.send({id: my_id, opponent_color: player_color}); //Send info so peer can connect back
+	}, 2000);
       }          
-      conn.send({opponent_name: names.client}); //Send client nickname.
+      //conn.send({opponent_name: names.client}); //Send client nickname.
       init();
-    });
+    });	
   };
 
   // When Peer object is created, set my_id to peerjs token
   peer.on('open', function(id) {
     my_id = id;  // peerjs token is assigned
     $('#search-button').prop('disabled', false);  // Activates search button
-    console.log('My peer ID is: ' + id);
+    console.log('My peer ID is: ' + id); 
+    // heartbeat pings are used to keep connections alive
+    var heartbeater = makePeerHeartbeater( peer );
   });
 
   //Receiving connection
-  peer.on('connection', function(connection) {
-      
+  peer.on('connection', function(connection) { 
+	console.log("Receiving connection");
     //Connection sending data
-    connection.on('data', function(data){
+    connection.on("data", function(data){
       if("id" in data) {
+	console.log("Connecting back to peer");
         player_color = (data.opponent_color == 1) ? 0 : 1;
         connect_to_player(data.id, false); // Connect back to peer
       }
@@ -134,9 +160,10 @@ var network = {};  // Namespace for network connection
       data: JSON.stringify({id: my_id, size: $('#size').val()}),
       contentType: 'application/json;charset=UTF-8',
       success: function(result) {
-        if(result.id != null)
+        if(result.id != null) {
+	console.log("Initiating connection, requesting peer to connect back to me");
           connect_to_player(result.id, true);
-        else
+	} else
           console.log(result);
         },
       error: function(error) {
@@ -144,7 +171,31 @@ var network = {};  // Namespace for network connection
       }
     }); //End of Ajax
   };
-
+	/**
+	* This is sort of a hack to keep the connection alive
+	* https://github.com/peers/peerjs/issues/227
+	*/
+	function makePeerHeartbeater ( peer ) {
+	    var timeoutId = 0;
+	    function heartbeat () {
+		timeoutId = setTimeout( heartbeat, 10000 );
+		if ( peer.socket._wsOpen() ) {
+		    peer.socket.send( {type:'HEARTBEAT'} );
+		}
+	    }
+	    // Start 
+	    heartbeat();
+	    // return
+	    return {
+		start : function () {
+		    if ( timeoutId === 0 ) { heartbeat(); }
+		},
+		stop : function () {
+		    clearTimeout( timeoutId );
+		    timeoutId = 0;
+		}
+	    };
+	}
   /**
    * Updates a users win/loss/draw record by increment of given numbers
    * @param  {String} name - Username

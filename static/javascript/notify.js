@@ -8,7 +8,6 @@ var notify = {};
   // Listener that updates if tab is inactive active
   $(window).on('blur focus', function(e) {
     prevEvent = e.type;
-    console.log('prevType saved as: ' + prevEvent);
   });
   
   //Base of this code is taken from http://stackoverflow.com/questions/2271156/chrome-desktop-notification-example
@@ -20,7 +19,6 @@ var notify = {};
   
   //shows a notification if permission is granted, notification auotimatically closes after timeout duration in ms
   this.createNotification = function(title, body, timeout) {
-    console.log('create');
     if (!Notification || prevEvent !== 'blur') {
       // Either notifications are not supported by browser or tab is active (no need to show).
       return;

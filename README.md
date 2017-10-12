@@ -28,5 +28,3 @@ I deleted a flexbox long ago, think that's what's causing this.
 Replace the search button with a cancel button during search maybe?
 #### Easy: Make searching for game nice
 Have a spinning wheel or something, also a cancel button.
-#### Peerjs on https
-This did work before, I think it has something to do with the proxy set up in sites-available?
