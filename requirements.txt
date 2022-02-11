@@ -47,7 +47,7 @@ singledispatch==3.4.0.3
 six==1.10.0
 software-center-aptd-plugins==0.0.0
 stevedore==1.21.0
-Twisted==16.0.0
+Twisted==22.1.0
 ubuntuone-client-data==14.4
 unity-lens-photos==1.0
 urllib3==1.13.1
