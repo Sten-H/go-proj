@@ -12,7 +12,7 @@ duplicity==0.7.6
 enum34==1.1.2
 futures==3.0.5
 gyp==0.1
-html5lib==0.999
+html5lib==0.99999999
 httplib2==0.9.1
 i3-py==0.6.4
 idna==2.0
