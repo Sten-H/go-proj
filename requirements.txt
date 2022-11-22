@@ -25,7 +25,7 @@ oauthlib==1.0.3
 oneconf==0.3.9
 PAM==0.4.2
 pbr==2.0.0
-Pillow==3.1.2
+Pillow==9.3.0
 piston-mini-client==0.7.5
 ply==3.7
 pyasn1==0.1.9
